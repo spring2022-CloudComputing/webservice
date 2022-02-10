@@ -17,7 +17,7 @@ describe('GET /healthz', function () {
     it('should not return 200 Status', (done) => {
         supertest(app)
             .get('/healthzA')
-            .expect(200).end((err, res) => {
+            .expect(404).end((err, res) => {
                 done(err || undefined);
             });
     });
