@@ -39,19 +39,10 @@ If the installation was successful, you should be able to run the following comm
     $ git clone git@github.com:spring2022-CloudComputing/webservice.git
     $ cd cd webwebservice/API-test1
     $ npm install
-
-## Configure app
-
-Open `a/nice/path/to/a.file` then edit it with your settings. You will need:
-
-- A setting;
-- Another setting;
-- One more setting;
-
 ## Running the project
 
     $ npm run start:server
 
-## Simple build for production
+## Running Unit Test cases
 
     $ npm test
