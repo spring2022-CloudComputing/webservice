@@ -38,13 +38,47 @@ router.get("/getData", (req, res) => {
 router.get("/v1/user/self", (req, res) => {
 
     var user = auth(req);
-    console.log(user);
+    // const values = [request.body.first_name, request.body.last_name, request.body.password, request.body.username];
 
-    mysqlConnection.query(`SELECT * FROM User where User.username = '` + user.name + `' `, (err, rows, fields) => {
+    var finalRes = res;
+    mysqlConnection.query(`SELECT password FROM User where User.username = '` + user.name + `' `, (err, rows, fields) => {
         if (!err) {
-            res.send(rows);
+            //Check if User wth username exist 
+            if (!rows.length) {
+                console.log('No user');
+                res.status(400).send('');
+            } else {
+                var rowRes = Object.values(JSON.parse(JSON.stringify(rows)));
+                console.log('update user ', rows);
+                var passowrd = rowRes[0].password;
+                //Compare password hash with db password hash
+                bcrypt.compare(user.name + ':' + user.pass, passowrd, function (err, result) {
+                    if (err) {
+                        console.log('result of hash compare false')
+                        finalRes.status(400).send('');
+                    }
+                    //Handle request when username and password matches
+                    if (result) {
+                        // Return id, first_name, last_name, username, account_created, account_updated as required
+                        mysqlConnection.query(`SELECT id, first_name, last_name, username, account_created, account_updated FROM User where User.username = '` + user.name + `' `, (err, rows, fields) => {
+                            if (!err) {
+                                var rowRes = Object.values(JSON.parse(JSON.stringify(rows)));
+                                console.log('rows from', rowRes[0])
+                                res.status(200).send(rowRes[0]);
+                            } else {
+                                console.log(err);
+                            }
+                        });
+                    } else {
+                        console.log('result of hash compare false')
+                        res.status(400).send('');
+                    }
+                });
+            }
+
         } else {
             console.log(err);
+            res.status(400).send('');
         }
     })
 });
@@ -57,9 +91,8 @@ router.put("/v1/user/self", (request, res) => {
 
     var finalRes = res;
     mysqlConnection.query(`SELECT password FROM User where User.username = '` + user.name + `' `, (err, rows, fields) => {
-
-
         if (!err) {
+            //Check if User wth username exist 
             if (!rows.length) {
                 console.log('No user');
                 res.status(400).send('');
@@ -67,19 +100,23 @@ router.put("/v1/user/self", (request, res) => {
                 var rowRes = Object.values(JSON.parse(JSON.stringify(rows)));
                 console.log('update user ', rows);
                 var passowrd = rowRes[0].password;
+                //Compare password hash with db password hash
                 bcrypt.compare(user.name + ':' + user.pass, passowrd, function (err, result) {
                     if (err) {
                         console.log('result of hash compare false')
                         finalRes.status(400).send('');
                     }
+                    //Handle request when username and password matches
                     if (result) {
                         console.log('result of hash compare true')
+                        //Find Hash of the new User name and password 
                         bcrypt.genSalt(saltRounds, function (err, salt) {
                             bcrypt.hash(user.name + ':' + user.pass, salt, function (err, hash) {
                                 if (err) {
                                     console.log(err);
                                     res.status(400).send('');
                                 }
+                                //Finally Update the table with new values
                                 mysqlConnection.query(`UPDATE User SET first_name = '` + values[0] + `', last_name = '` + values[1] + `', password = '` +
                                     hash + `' , username = '` + values[3] + `', account_updated = NOW() 
                                         WHERE username = '` + values[3] + `' `, (err, rows, fields) => {
