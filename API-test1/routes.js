@@ -149,41 +149,47 @@ router.put("/v1/user/self", (request, res) => {
 router.post("/v1/user/", (request, res) => {
     console.log('create user called')
     const values = [request.body.first_name, request.body.last_name, request.body.password, request.body.username];
+    
+    if (values[0] == undefined || values[1] == undefined || values[2] == undefined || values[3] == undefined) {
+        console.log('Oops! something is missing in request body')
+        res.status(400).send('');
+    } else {
 
-    bcrypt.genSalt(saltRounds, function (err, salt) {
-        bcrypt.hash(values[3] + ':' + values[2], salt, function (err, hash) {
+        bcrypt.genSalt(saltRounds, function (err, salt) {
+            bcrypt.hash(values[3] + ':' + values[2], salt, function (err, hash) {
 
-            values[2] = hash;
-            mysqlConnection.query(`INSERT INTO User( id, first_name, last_name, password, username, account_created, account_updated)
+                values[2] = hash;
+                mysqlConnection.query(`INSERT INTO User( id, first_name, last_name, password, username, account_created, account_updated)
     
                 VALUES ( UUID() ,'` + values[0] + `' , '` + values[1] + `' , '` + values[2] + `' , '` + values[3] + `' , NOW(), NOW())`, (err, rows, fields) => {
-                if (!err) {
-                    console.log(values[3]);
-                    mysqlConnection.query(`SELECT id, first_name, last_name, username, account_created, account_updated FROM User where User.username = '` + values[3] + `' `, (err, rows, fields) => {
-                        if (!err) {
+                    if (!err) {
+                        console.log(values[3]);
+                        mysqlConnection.query(`SELECT id, first_name, last_name, username, account_created, account_updated FROM User where User.username = '` + values[3] + `' `, (err, rows, fields) => {
+                            if (!err) {
 
 
-                            var rowRes = Object.values(JSON.parse(JSON.stringify(rows)));
-                            console.log('rows from', rowRes[0])
+                                var rowRes = Object.values(JSON.parse(JSON.stringify(rows)));
+                                console.log('rows from', rowRes[0])
 
-                            res.status(201).send(rowRes[0]);
+                                res.status(201).send(rowRes[0]);
 
-                        } else {
-                            console.log(err);
-                            res.status(400).send(rows);
-                        }
-                    })
+                            } else {
+                                console.log(err);
+                                res.status(400).send('');
+                            }
+                        })
 
 
 
-                } else {
-                    console.log(err);
-                    res.status(400).send(rows);
-                }
+                    } else {
+                        console.log(err);
+                        res.status(400).send('');
+                    }
+                });
+
             });
-
         });
-    });
+    }
 
 });
 
