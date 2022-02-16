@@ -54,38 +54,55 @@ router.put("/v1/user/self", (request, res) => {
     var user = auth(request);
     const values = [request.body.first_name, request.body.last_name, request.body.password, request.body.username];
 
+
     var finalRes = res;
     mysqlConnection.query(`SELECT password FROM User where User.username = '` + user.name + `' `, (err, rows, fields) => {
+
+
         if (!err) {
-            var rowRes = Object.values(JSON.parse(JSON.stringify(rows)));
-
-            var passowrd = rowRes[0].password;
-            console.log(passowrd)
-            bcrypt.compare(user.name + ':' + user.pass, passowrd, function (err, result) {
-                if (result) {
-                    console.log('result of hash compare true')
-                    bcrypt.genSalt(saltRounds, function (err, salt) {
-                        bcrypt.hash(user.name + ':' + user.pass, salt, function (err, hash) {
-                            mysqlConnection.query(`UPDATE User SET first_name = '` + values[0] + `', last_name = '` + values[1] + `', password = '` +
-                                hash + `' , username = '` + values[3] + `', account_updated = NOW() 
+            if (!rows.length) {
+                console.log('No user');
+                res.status(400).send('');
+            } else {
+                var rowRes = Object.values(JSON.parse(JSON.stringify(rows)));
+                console.log('update user ', rows);
+                var passowrd = rowRes[0].password;
+                bcrypt.compare(user.name + ':' + user.pass, passowrd, function (err, result) {
+                    if (err) {
+                        console.log('result of hash compare false')
+                        finalRes.status(400).send('');
+                    }
+                    if (result) {
+                        console.log('result of hash compare true')
+                        bcrypt.genSalt(saltRounds, function (err, salt) {
+                            bcrypt.hash(user.name + ':' + user.pass, salt, function (err, hash) {
+                                if (err) {
+                                    console.log(err);
+                                    res.status(400).send('');
+                                }
+                                mysqlConnection.query(`UPDATE User SET first_name = '` + values[0] + `', last_name = '` + values[1] + `', password = '` +
+                                    hash + `' , username = '` + values[3] + `', account_updated = NOW() 
                                         WHERE username = '` + values[3] + `' `, (err, rows, fields) => {
-                                    if (!err) {
-                                        res.status(204).send('');
-                                    } else {
-                                        console.log(err);
-                                    }
-                                })
+                                        if (!err) {
+                                            res.status(204).send('');
+                                        } else {
+                                            console.log(err);
+                                            res.status(400).send('');
+                                        }
+                                    })
 
+                            });
                         });
-                    });
-                } else {
-                    console.log('result of hash compare false')
-                    finalRes.status(400).send('');
-                }
-            });
+                    } else {
+                        console.log('result of hash compare false')
+                        finalRes.status(400).send('');
+                    }
+                });
+            }
 
         } else {
             console.log(err);
+            res.status(400).send('');
         }
     })
 
@@ -105,13 +122,13 @@ router.post("/v1/user/", (request, res) => {
                 VALUES ( UUID() ,'` + values[0] + `' , '` + values[1] + `' , '` + values[2] + `' , '` + values[3] + `' , NOW(), NOW())`, (err, rows, fields) => {
                 if (!err) {
                     console.log(values[3]);
-                    mysqlConnection.query(`SELECT id, first_name, last_name, username, account_created, account_updated FROM User where User.username = '` + values[3]+ `' `, (err, rows, fields) => {
+                    mysqlConnection.query(`SELECT id, first_name, last_name, username, account_created, account_updated FROM User where User.username = '` + values[3] + `' `, (err, rows, fields) => {
                         if (!err) {
-                            
-                            
+
+
                             var rowRes = Object.values(JSON.parse(JSON.stringify(rows)));
-                            console.log('rows from' ,rowRes[0])
-                            
+                            console.log('rows from', rowRes[0])
+
                             res.status(201).send(rowRes[0]);
 
                         } else {
@@ -121,7 +138,7 @@ router.post("/v1/user/", (request, res) => {
                     })
 
 
-                   
+
                 } else {
                     console.log(err);
                     res.status(400).send(rows);
