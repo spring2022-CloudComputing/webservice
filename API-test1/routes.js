@@ -118,8 +118,8 @@ router.put("/v1/user/self", (request, res) => {
                                 }
                                 //Finally Update the table with new values
                                 mysqlConnection.query(`UPDATE User SET first_name = '` + values[0] + `', last_name = '` + values[1] + `', password = '` +
-                                    hash + `' , username = '` + values[3] + `', account_updated = NOW() 
-                                        WHERE username = '` + values[3] + `' `, (err, rows, fields) => {
+                                    hash + `' , username = '` + user.name + `', account_updated = NOW() 
+                                        WHERE username = '` + user.name + `' `, (err, rows, fields) => {
                                         if (!err) {
                                             res.status(204).send('');
                                         } else {
