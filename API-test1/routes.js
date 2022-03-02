@@ -111,7 +111,7 @@ router.put("/v1/user/self", (request, res) => {
                         console.log('result of hash compare true')
                         //Find Hash of the new User name and password 
                         bcrypt.genSalt(saltRounds, function (err, salt) {
-                            bcrypt.hash(user.name + ':' + user.pass, salt, function (err, hash) {
+                            bcrypt.hash(user.name + ':' + values[2], salt, function (err, hash) {
                                 if (err) {
                                     console.log(err);
                                     res.status(400).send('');
