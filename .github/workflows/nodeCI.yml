@@ -32,4 +32,13 @@ jobs:
       working-directory: API-test1
       run: npm test
 
+      # build artifact
+    - name: Setting up Hashicorp Packer
+      uses: hashicorp-contrib/setup-packer@v1
+      with: 
+        packer-version: 1.7.10
+    
+    - name: run packer-version
+      run: packer build -var-file variables.json run-ami.json 
+
 
