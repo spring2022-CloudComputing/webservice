@@ -25,11 +25,12 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
     - name: running ci command
-      working-directory: API-test1
+      working-directory: test/API-test1
       run: npm ci
       
     - name: running tests
-      working-directory: API-test1
+      working-directory: test/API-test1
       run: npm test
+
 
 

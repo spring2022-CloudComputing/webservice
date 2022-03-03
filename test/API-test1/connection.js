@@ -4,8 +4,8 @@ import mysql  from 'mysql';
 var mysqlConnection = mysql.createConnection({
     host:'localhost',
     user: 'root',
-    password: "password",
-    database: "nodeDBTry",
+    password: "Qwerty@12345!",
+    database: "cloud",
     multipleStatements: true,
 })
 
