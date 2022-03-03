@@ -25,11 +25,25 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
     - name: running ci command
-      working-directory: API-test1
+      working-directory: test/API-test1
       run: npm ci
       
     - name: running tests
-      working-directory: API-test1
+      working-directory: test/API-test1
       run: npm test
+
+    - name: Auth
+      env: 
+        aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY }}
+        aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+    - name: Setting up Hashicorp Packer
+      uses: hashicorp-contrib/setup-packer@v1
+      with: 
+        packer-version: 1.7.10
+
+    - name: run packer-version
+      working-directory: AMI
+      run: packer build run-ami.json
 
 
