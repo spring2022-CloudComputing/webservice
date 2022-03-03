@@ -39,6 +39,9 @@ jobs:
         packer-version: 1.7.10
     
     - name: run packer-version
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       working-directory: AMI
       run: packer build run-ami.json
 
