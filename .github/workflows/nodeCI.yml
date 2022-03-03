@@ -3,6 +3,12 @@
 
 name: Node.js CI
 
+env:
+ CI: true
+ aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY }}
+ aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }
+ ssh_username: "ec2-user"
+
 on:
   pull_request:
     branches: [ main ]
@@ -32,5 +38,12 @@ jobs:
       working-directory: test/API-test1
       run: npm test
 
-
-
+    - name: Setting up Hashicorp Packer
+      uses: hashicorp-contrib/setup-packer@v1
+      with: 
+        packer-version: 1.7.10
+        
+    - uses: actions/checkout@v2
+    - name: run packer-version
+      working-directory: AMI
+      run: packer build ami.json
