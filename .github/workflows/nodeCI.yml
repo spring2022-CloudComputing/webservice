@@ -39,6 +39,7 @@ jobs:
         packer-version: 1.7.10
     
     - name: run packer-version
+      working-directory: AMI
       run: packer build -var-file variables.json run-ami.json 
 
 
