@@ -40,6 +40,6 @@ jobs:
     
     - name: run packer-version
       working-directory: AMI
-      run: packer build run-ami.json 
+      run: packer build run-ami.json
 
 
