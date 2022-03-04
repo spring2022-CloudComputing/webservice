@@ -14,6 +14,7 @@
         "instance_type": "t2.micro",
         "ssh_username": "{{user `ssh_username`}}",
         "ami_name": "csye6225_{{timestamp}}",
+        "ami_users": "861022598256",
         "ami_description": "Linux AMI for CSYE_6225",
         
         "tags": {
