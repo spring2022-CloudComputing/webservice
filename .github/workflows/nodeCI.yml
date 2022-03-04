@@ -32,10 +32,10 @@ jobs:
       with: 
         packer-version: 1.7.10
         
-    # - uses: actions/checkout@v2
-    # - name: run packer-version
-    #   working-directory: AMI
-    #   run: packer build run-ami.json
+    - uses: actions/checkout@v2
+    - name: run packer-version
+      working-directory: AMI
+      run: packer build run-ami.json
     
     - uses: actions/checkout@v2
     - name: Use Node.js ${{ matrix.node-version }}
