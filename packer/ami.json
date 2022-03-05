@@ -3,7 +3,6 @@
         "AWS_ACCESS_KEY_ID": "",
         "AWS_SECRET_ACCESS_KEY": "",
         "aws_region": "us-east-1",
-        "subnet_id": "subnet-06aa189b0e9d7ec2a",
         "source_ami": "ami-0c293f3f676ec4f90",
         "ssh_username": "ec2-user"
     },
@@ -21,7 +20,7 @@
             "ami_name": "csye6225_{{timestamp}}",
             "ami_description": "Linux 2 AMI for csye6225",
             "ami_users": [
-                "981331903688"
+                "861022598256"
             ],
             "ami_block_device_mappings": [
                 {
