@@ -47,7 +47,7 @@
             "script": "provisioners.sh"
         },
         {
-            "type": "file"
+            "type": "file",
             "source": "../",
             "destination": "/home/ec2-user/node-app"
         },
