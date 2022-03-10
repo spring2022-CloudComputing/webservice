@@ -95,10 +95,10 @@ async function deleteUserPic(req, res, next) {
         console.log('delete image',image);
         var del = await fileService.deleteFile( s3, image);
         if(del){
-            res.status(200).send('ok')
+            res.status(200).send('')
         }else{
             res.status(404).send({
-                message: 'Not ok!'
+                message: 'error deleting'
             });
         }
         
