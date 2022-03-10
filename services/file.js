@@ -30,7 +30,7 @@ const fileUpload = async (source, targetName, s3, fileId, req, res) => {
             });
 
             var params = {
-                Bucket: env.AWS_BUCKET_NAME ,
+                Bucket: process.env.AWS_BUCKET_NAME ,
                 Key: user.id+'/'+targetName,
                 Body: filedata
             };
@@ -88,7 +88,7 @@ const deleteFile = async ( s3, image) => {
     let deleted = true;
     const params = {
 
-        Bucket: env.AWS_BUCKET_NAME,
+        Bucket: process.env.AWS_BUCKET_NAME,
         Key:   image.user_id+'/'+image.file_name
 
     }
