@@ -56,9 +56,6 @@
             "inline": [
                 "cd /home/ec2-user/node-app",
                 "sudo npm install",
-                "sleep 10",
-                "sudo pm2 restart all --update-env",
-                "sleep 20",
                 "sudo pm2 start index.js",
                 "sudo pm2 startup systemd",
                 "sudo pm2 save",
