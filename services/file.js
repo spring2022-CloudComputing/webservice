@@ -10,7 +10,9 @@ const dbConfig = require("../config/configDB.js");
 const File = db.file;
 const User = db.users;
 const Image = db.image;
-
+const util = require('util')
+const unlinkFile = util.promisify(fs.unlink)
+require('dotenv').config()
 
 const fileUpload = async (source, targetName, s3, fileId, req, res) => {
 
@@ -22,7 +24,7 @@ const fileUpload = async (source, targetName, s3, fileId, req, res) => {
             console.log('s3')
 
             var params = {
-                Bucket: process.env.AWS_BUCKET_NAME || '39ede140.dev.domain.tld',
+                Bucket: process.env.AWS_BUCKET_NAME ,
                 Key: targetName,
                 Body: filedata
             };
@@ -34,13 +36,10 @@ const fileUpload = async (source, targetName, s3, fileId, req, res) => {
                     res.status(500).send({
                         message: err
                     });
-                    // logger.error(err);
 
                 } else {
 
                     const aws_metadata = JSON.parse(JSON.stringify(data));
-                    console.log('aws_metadata',aws_metadata);
-
                     var user = await User.findOne({
                         where: {
                             username: req.user.username
@@ -68,11 +67,6 @@ const fileUpload = async (source, targetName, s3, fileId, req, res) => {
                                 message: err.message || "Some error occurred while creating the user!"
                             });
                         });
-
-                    // res.status(201).send({
-                    //     'success':aws_metadata
-                    // });
-                    // console.log("File Attached to s3..!")
                 }
             });
 
@@ -84,6 +78,8 @@ const fileUpload = async (source, targetName, s3, fileId, req, res) => {
         }
     });
 }
+
+
 
 module.exports = {
     fileUpload

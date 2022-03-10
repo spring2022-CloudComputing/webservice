@@ -14,7 +14,7 @@ const fs = require('fs')
 
 //Creating a new instance of S3:
 AWS.config.update({
-    region: process.env.AWS_REGION || 'us-east-1'
+    region: process.env.AWS_REGION 
 });
 const s3 = new AWS.S3();
 // const bucket = process.env.AWS_BUCKET_NAME;
@@ -57,7 +57,27 @@ async function updateUserPic(req, res, next) {
 // Get pic
 
 async function getUserPic(req, res, next) {
+    const user = await getUserByUsername(req.user.username);
 
+    var image = await Image.findOne({
+        where: {
+            user_id: user.id
+        }
+    });
+
+    if (image) {
+        res.status(200).send({
+            file_name: image.file_name,
+            id: image.id,
+            url: image.url,
+            upload_date: image.upload_date,
+            user_id: image.user_id
+        });
+    } else {
+        res.status(400).send({
+            message: 'No Image found!'
+        });
+    }
 }
 
 // Delete pic
@@ -67,7 +87,6 @@ async function deleteUserPic(req, res, next) {}
 async function getUserByUsername(username) {
 
     return User.findOne({
-        ...console.log('is here getUserByUsername'),
         where: {
             username: username
         }

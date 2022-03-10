@@ -34,7 +34,7 @@ router.post("/v1/user/self/pic", baseAuthentication(), upload.single('file'), im
 
 // Get Picture
 
-// router.get("/v1/user/self/pic", baseAuthentication(), userController.getUserPic);
+router.get("/v1/user/self/pic", baseAuthentication(), imageController.getUserPic);
 
 // Delete Picture
 
