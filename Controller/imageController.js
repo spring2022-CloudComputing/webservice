@@ -14,7 +14,7 @@ const fs = require('fs')
 
 //Creating a new instance of S3:
 AWS.config.update({
-    region: process.env.AWS_REGION 
+    region: process.env.AWS_REGION
 });
 const s3 = new AWS.S3();
 // const bucket = process.env.AWS_BUCKET_NAME;
@@ -23,6 +23,24 @@ const s3 = new AWS.S3();
 
 
 async function updateUserPic(req, res, next) {
+    const user = await getUserByUsername(req.user.username);
+
+    var image = await Image.findOne({
+        where: {
+            user_id: user.id
+        }
+    });
+
+    if (image) {
+        var del = await fileService.deleteFile(s3, image);
+        if (del) {
+
+        } else {
+            res.status(404).send({
+                message: 'error deleting'
+            });
+        }
+    }
 
     if (!req.file) {
         res.status(400).send({
@@ -52,6 +70,7 @@ async function updateUserPic(req, res, next) {
         await fileService.fileUpload(req.file.path, fileName, s3, fileId, req, res);
 
     }
+
 }
 
 // Get pic
@@ -92,16 +111,16 @@ async function deleteUserPic(req, res, next) {
     });
 
     if (image) {
-        console.log('delete image',image);
-        var del = await fileService.deleteFile( s3, image);
-        if(del){
+        console.log('delete image', image);
+        var del = await fileService.deleteFile(s3, image);
+        if (del) {
             res.status(200).send('')
-        }else{
+        } else {
             res.status(404).send({
                 message: 'error deleting'
             });
         }
-        
+
     } else {
         res.status(404).send({
             message: 'No Image found!'
