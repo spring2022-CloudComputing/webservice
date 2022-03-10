@@ -14,7 +14,7 @@ const fs = require('fs')
 
 //Creating a new instance of S3:
 AWS.config.update({
-    region: process.env.AWS_REGION
+    region: env.AWS_REGION
 });
 const s3 = new AWS.S3();
 // const bucket = process.env.AWS_BUCKET_NAME;
@@ -58,7 +58,7 @@ async function updateUserPic(req, res, next) {
         res.status(400).send({
             message: 'Unsupported File Type'
         });
-        logger.error("Unsupported File Format..!");
+        console.log("Unsupported File Format..!");
 
     } else {
 
