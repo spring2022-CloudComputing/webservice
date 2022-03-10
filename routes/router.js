@@ -38,6 +38,6 @@ router.get("/v1/user/self/pic", baseAuthentication(), imageController.getUserPic
 
 // Delete Picture
 
-// router.delete("/v1/user/self/pic", baseAuthentication(), userController.deleteUserPic);
+router.delete("/v1/user/self/pic", baseAuthentication(), imageController.deleteUserPic);
 
 module.exports = router;

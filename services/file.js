@@ -21,11 +21,17 @@ const fileUpload = async (source, targetName, s3, fileId, req, res) => {
         if (!err) {
 
             let s3_start = Date.now();
-            console.log('s3')
+            console.log('s3', targetName)
+
+            var user = await User.findOne({
+                where: {
+                    username: req.user.username
+                }
+            });
 
             var params = {
                 Bucket: process.env.AWS_BUCKET_NAME ,
-                Key: targetName,
+                Key: user.id+'/'+targetName,
                 Body: filedata
             };
 
@@ -40,12 +46,8 @@ const fileUpload = async (source, targetName, s3, fileId, req, res) => {
                 } else {
 
                     const aws_metadata = JSON.parse(JSON.stringify(data));
-                    var user = await User.findOne({
-                        where: {
-                            username: req.user.username
-                        }
-                    });
-
+                    // console.log(aws_metadata)
+                    
                     var image = {
                         id: uuidv4(),
                         file_name: targetName,
@@ -64,7 +66,7 @@ const fileUpload = async (source, targetName, s3, fileId, req, res) => {
                         })
                         .catch(err => {
                             res.status(500).send({
-                                message: err.message || "Some error occurred while creating the user!"
+                                message: err.message || "Some error occurred while creating the image!"
                             });
                         });
                 }
@@ -73,14 +75,53 @@ const fileUpload = async (source, targetName, s3, fileId, req, res) => {
         } else {
             console.log("errr", err)
             res.status(500).send({
-                message: err
+                message: "Some error occurred while creating the image!"
             });
         }
     });
 }
 
+const deleteFile = async ( s3, image) => {
+
+    let s3_start = Date.now();
+    console.log('deleteFile')
+    let deleted = true;
+    const params = {
+
+        Bucket: process.env.AWS_BUCKET_NAME,
+        Key:   image.user_id+'/'+image.file_name
+
+    }
+    
+    await s3.deleteObject(params, async(err, data) => {
+
+        if(err){
+            console.log('deleteFile err' ,err)
+
+            deleted = false;
+            logger.error(err)
+
+        } else {
+            console.log('deleteFile success')
+          
+            await Image.destroy(
+                {
+                    where:{
+                        id: image.id
+                    }
+                }
+            ).then(data => {
+                deleted = true;
+            });
+            
+        }
+    });
+
+    return deleted;
+}
 
 
 module.exports = {
-    fileUpload
+    fileUpload,
+    deleteFile
 };

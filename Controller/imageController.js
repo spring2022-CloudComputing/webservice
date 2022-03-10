@@ -74,7 +74,7 @@ async function getUserPic(req, res, next) {
             user_id: image.user_id
         });
     } else {
-        res.status(400).send({
+        res.status(404).send({
             message: 'No Image found!'
         });
     }
@@ -82,7 +82,32 @@ async function getUserPic(req, res, next) {
 
 // Delete pic
 
-async function deleteUserPic(req, res, next) {}
+async function deleteUserPic(req, res, next) {
+    const user = await getUserByUsername(req.user.username);
+
+    var image = await Image.findOne({
+        where: {
+            user_id: user.id
+        }
+    });
+
+    if (image) {
+        console.log('delete image',image);
+        var del = await fileService.deleteFile( s3, image);
+        if(del){
+            res.status(200).send('ok')
+        }else{
+            res.status(404).send({
+                message: 'Not ok!'
+            });
+        }
+        
+    } else {
+        res.status(404).send({
+            message: 'No Image found!'
+        });
+    }
+}
 
 async function getUserByUsername(username) {
 
