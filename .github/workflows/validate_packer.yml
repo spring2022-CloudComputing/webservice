@@ -34,11 +34,13 @@ jobs:
           ls -l appDir
           echo $GITHUB_PATH
 
-      - name: Build Packer Template
-        uses: ExitoLab/packer_build_action_aws@v0.2.10
+      # build ami
+      - name: Build Artifact
+        uses: hashicorp/packer-github-actions@master
         with:
-          templateFile: "ami.json"
-          workingDir: "packer"
+          command: build
+          arguments: "-color=false -on-error=abort"
+          target: ./packer/ami.json.pkr.hcl
       
       - name: Configuring AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1

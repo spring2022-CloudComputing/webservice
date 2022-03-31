@@ -11,8 +11,6 @@ env:
   GITHUB_REPO_PATH: ${{ github.workspace }}
 
 on:
-  # push:
-  #   branches: [main]
   pull_request:
     branches: [main]
 
@@ -36,9 +34,10 @@ jobs:
       - run: npm run build --if-present
       - run: npm test
 
-      - name: Validate Template
+    # Packer template validation
+      - name: Init Template
         uses: hashicorp/packer-github-actions@master
         with:
-          command: validate
-          arguments: -syntax-only
-          target: ./packer/ami.json
+          command: init
+          target: ./packer/ami.json.pkr.hcl
+
