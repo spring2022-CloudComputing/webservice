@@ -32,6 +32,7 @@ jobs:
           echo "mkdir"; mkdir appDir
           cp ../webservice.zip appDir
           ls -l appDir
+          echo $GITHUB_PATH
 
       - name: Build Packer Template
         uses: ExitoLab/packer_build_action_aws@v0.2.10
