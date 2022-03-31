@@ -11,8 +11,8 @@ env:
   GITHUB_REPO_PATH: ${{ github.workspace }}
 
 on:
-  push:
-    branches: [main]
+  # push:
+  #   branches: [main]
   pull_request:
     branches: [main]
 
