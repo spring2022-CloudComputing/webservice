@@ -27,6 +27,9 @@ sudo service codedeploy-agent status
 sudo service codedeploy-agent start
 sudo service codedeploy-agent status
 
+#install cloud watch agent
+sudo yum install amazon-cloudwatch-agent -y 
+
 ls
 cd /tmp/
 echo "$(pwd)"
@@ -38,3 +41,8 @@ ls -ltr
 chown ec2-user:ec2-user /home/ec2-user/webservice
 cd webservice 
 ls -ltr 
+
+sudo pm2 start index.js
+sudo pm2 save
+sudo pm2 startup systemd
+sudo pm2 list
