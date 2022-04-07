@@ -5,7 +5,7 @@ const fs = require('fs');
 const _ = require('underscore');
 // const SDC = require('statsd-client');
 const db = require('../config/sequelizeDB.js');
-// const logger = require('../config/logger');
+const logger = require('../config/logger');
 const dbConfig = require("../config/configDB.js");
 const File = db.file;
 const User = db.users;
@@ -56,6 +56,7 @@ const fileUpload = async (source, targetName, s3, fileId, req, res) => {
                     };
             
                     Image.create(image).then(data => {
+                        logger.info("update user 204");
                             res.status(201).send({
                                 file_name: data.file_name,
                                 id: data.id,
