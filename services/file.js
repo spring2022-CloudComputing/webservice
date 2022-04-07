@@ -3,10 +3,11 @@ const {
 } = require('uuid');
 const fs = require('fs');
 const _ = require('underscore');
-// const SDC = require('statsd-client');
 const db = require('../config/sequelizeDB.js');
-const logger = require('../config/logger');
-const dbConfig = require("../config/configDB.js");
+const logger = require("../config/logger");
+const SDC = require('statsd-client');
+const dbConfig = require('../config/configDB.js');
+const sdc = new SDC({host: dbConfig.METRICS_HOSTNAME, port: dbConfig.METRICS_PORT});
 const File = db.file;
 const User = db.users;
 const Image = db.image;
@@ -56,7 +57,8 @@ const fileUpload = async (source, targetName, s3, fileId, req, res) => {
                     };
             
                     Image.create(image).then(data => {
-                        logger.info("update user 204");
+                        logger.info("update user image 204");
+                        sdc.increment('endpoint.imageUpload');
                             res.status(201).send({
                                 file_name: data.file_name,
                                 id: data.id,
@@ -104,7 +106,8 @@ const deleteFile = async ( s3, image) => {
 
         } else {
             console.log('deleteFile success')
-          
+            logger.info("deleteFile success");
+            sdc.increment('endpoint.imageDelete');
             await Image.destroy(
                 {
                     where:{
