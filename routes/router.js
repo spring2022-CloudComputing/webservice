@@ -10,7 +10,6 @@ const sdc = new SDC({host: dbConfig.METRICS_HOSTNAME, port: dbConfig.METRICS_POR
 var start = new Date();
 
 // GET Method
-
 router.get("/healthz", (req, res) => {
     console.log("Is it hitting?")
     sdc.timing('health.timeout', start);
