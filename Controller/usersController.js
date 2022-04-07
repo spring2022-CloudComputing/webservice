@@ -4,6 +4,7 @@ const bcrypt = require('bcrypt');
 const {
     v4: uuidv4
 } = require('uuid');
+const dbConfig = require('../config/configDB.js');
 const logger = require("../config/logger");
 const SDC = require('statsd-client');
 const sdc = new SDC({host: dbConfig.METRICS_HOSTNAME, port: dbConfig.METRICS_PORT});
