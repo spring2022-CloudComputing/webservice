@@ -36,12 +36,12 @@ jobs:
           echo $GITHUB_PATH
 
       # build ami
-      - name: Build Artifact
-        uses: hashicorp/packer-github-actions@master
-        with:
-          command: build
-          arguments: "-color=false -on-error=abort"
-          target: ./packer/ami.json.pkr.hcl
+      # - name: Build Artifact
+      #   uses: hashicorp/packer-github-actions@master
+      #   with:
+      #     command: build
+      #     arguments: "-color=false -on-error=abort"
+      #     target: ./packer/ami.json.pkr.hcl
       
       - name: Configuring AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -49,7 +49,7 @@ jobs:
           aws-access-key-id: ${{ secrets.GHUSER_ACTION_KEY }}
           aws-secret-access-key: ${{ secrets.GHUSER_SECRET_KEY }}
           aws-region: us-east-1
-          
+
       - name: Copying artifact to S3
         run: |
           rm -rf aws
