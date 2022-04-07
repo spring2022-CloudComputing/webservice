@@ -19,7 +19,6 @@ router.get("/healthz", (req, res) => {
 });
 
 // POST Method
-
 router.post("/v1/user", userController.createUser);
 
 // GET Method (With Authentication)
