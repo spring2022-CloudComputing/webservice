@@ -26,12 +26,9 @@ router.post("/v1/user", userController.createUser);
 router.get("/v1/user/self", baseAuthentication(), userController.getUser);
 
 // PUT Method
-
 router.put("/v1/user/self", baseAuthentication(), userController.updateUser);
 
 // Post Method for Picture
-
-
 const upload = multer({
     dest: 'uploads/'
 })
