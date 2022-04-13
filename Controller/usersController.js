@@ -18,16 +18,18 @@ AWS.config.update({
 var sns = new AWS.SNS({});
 
 // //Delete all User
-async function deleteAllUser(req, res, next){
+async function deleteAllUser(req, res, next) {
     // db.User.destroy({
     //     where: {},
     //     truncate: true
     //   });
     console.log('delete all')
-    await User.sync({ force: true });
+    await User.sync({
+        force: true
+    });
     console.log('delete all pro')
     res.status(201).send();
-   
+
 }
 
 // Create a User
@@ -66,7 +68,7 @@ async function createUser(req, res, next) {
         };
         console.log('above user');
         User.create(user).then(async udata => {
-                
+
                 let link = ' http://demo.harshaljaiswal.me/v1/verifyUserEmail?email=' + udata.username + '&token=' + uuidv4();
                 const data_link = {
                     email: udata.id,
@@ -84,24 +86,21 @@ async function createUser(req, res, next) {
                 var parameter = {
                     TableName: 'csye6225',
                     Item: {
-                        'Token': {
-                            S: randomnanoID
-                        },
-                        'TimeToLive': {
-                            N: expiryTime.toString()
-                        }
+                        'Email': udata.username,
+                        'Token': randomnanoID,
+                        'TimeToLive': expiryTime.toString()
                     }
                 };
                 console.log('after user');
                 //saving the token onto the dynamo DB
-                try{
+                try {
                     var dydb = await dynamoDatabase.putItem(parameter).promise();
-                }catch(err){
+                } catch (err) {
                     console.log('dynamoDatabase', err);
                 }
-                
+
                 console.log('dynamoDatabase');
-                var msg ={
+                var msg = {
                     'username': udata.username,
                     'token': randomnanoID
                 };
