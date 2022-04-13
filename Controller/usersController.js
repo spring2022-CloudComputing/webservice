@@ -60,7 +60,7 @@ async function createUser(req, res, next) {
                     email: udata.id,
                     link: link
                 }
-                console.log('data_link',JSON.stringify(data_link))
+                
 
                 const params = {
 
@@ -68,15 +68,15 @@ async function createUser(req, res, next) {
                     TargetArn: 'arn:aws:sns:us-east-1:861022598256:verify_email:9ea6311f-e589-4175-ae3e-961c4865ce4f'
 
                 }
-                sns.publish(params).promise().
-                then(
+                var publishTextPromise = sns.publish(params).promise();
+                console.log('publishTextPromise');
+                publishTextPromise.then(
                     function (data) {
-
-                        console.log(`Message sent to the topic ${params.TopicArn}`);
-                        console.log("MessageID is " + data.MessageId);
-                        res.status(204).send();
+                        console.log('publishTextPromise.then');
+                        console.log(`Message sent to the topic ${params.TargetArn}`);
+                        console.log("MessageID is " + data);
                         logger.info("/create user 201");
-                        logger.info(`Message sent to the topic ${params.TopicArn}`);
+                        logger.info(`Message sent to the topic ${params.TargetArn}`);
                         sdc.increment('endpoint.userCreate');
                         res.status(201).send({
                             id: udata.id,
