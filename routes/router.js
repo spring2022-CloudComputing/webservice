@@ -54,6 +54,6 @@ router.delete("/v1/deleteAll", userController.deleteAllUser);
 
 
 // Verify User
-router.get("/v1/user/verifyUser/", userController.verifyUser);
+router.get("/v1/user/verifyUserEmail", userController.verifyUser);
 
 module.exports = router;
