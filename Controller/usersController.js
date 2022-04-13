@@ -80,7 +80,8 @@ async function createUser(req, res, next) {
                     region: 'us-east-1'
                 });
                 const initialTime = Math.round(Date.now() / 1000);
-                const expiryTime = initialTime + 4 * 60;
+                const expiryTime = new Date().getTime();
+                //initialTime + 4 * 60;
 
                 // Create the Service interface for dynamoDB
                 var parameter = {
@@ -88,7 +89,7 @@ async function createUser(req, res, next) {
                     Item: {
                         'Email': udata.username,
                         'Token': randomnanoID,
-                        'TimeToLive': expiryTime.toString()
+                        'TimeToLive': expiryTime.toString(),
                     }
                 };
                 console.log('after user');
