@@ -48,7 +48,8 @@ async function createUser(req, res, next) {
             first_name: req.body.first_name,
             last_name: req.body.last_name,
             password: hash,
-            username: req.body.username
+            username: req.body.username,
+            isVerified: false
         };
 
         User.create(user).then(data => {
