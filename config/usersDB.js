@@ -16,7 +16,7 @@ module.exports = (sequelize, Sequelize) => {
         username: {
             type: Sequelize.STRING
         },
-        verified: {
+        isVerified: {
             type: Sequelize.BOOLEAN
         }
     });
