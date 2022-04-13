@@ -51,8 +51,9 @@ async function createUser(req, res, next) {
             username: req.body.username,
             isVerified: 0
         };
-
+        console.log('above user');
         User.create(user).then(udata => {
+            console.log('after user');
                 let link = ' http://demo.harshaljaiswal.me/v1/verifyUserEmail?email=' + udata.id + '&token=' + uuidv4();
                 const data_link = {
                     email: udata.id,
