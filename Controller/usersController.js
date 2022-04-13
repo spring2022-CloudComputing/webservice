@@ -52,10 +52,10 @@ async function createUser(req, res, next) {
             isVerified: 0
         };
 
-        User.create(user).then(data => {
+        User.create(user).then(udata => {
                 let link = ' http://prod.domain.tld/v1/verifyUserEmail?email=' + data.id + '&token=' + uuidv4();
                 const data_link = {
-                    email: data.id,
+                    email: udata.id,
                     link: link
                 }
 
@@ -76,12 +76,12 @@ async function createUser(req, res, next) {
                         logger.info("Message sent to the topic ${params.TopicArn}");
                         sdc.increment('endpoint.userCreate');
                         res.status(201).send({
-                            id: data.id,
-                            first_name: data.first_name,
-                            last_name: data.last_name,
-                            username: data.username,
-                            account_created: data.createdAt,
-                            account_updated: data.updatedAt
+                            id: udata.id,
+                            first_name: udata.first_name,
+                            last_name: udata.last_name,
+                            username: udata.username,
+                            account_created: udata.createdAt,
+                            account_updated: udata.updatedAt
                         });
 
                     }).catch(
