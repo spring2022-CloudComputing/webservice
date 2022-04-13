@@ -17,7 +17,8 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.STRING
         },
         isVerified: {
-            type: Sequelize.BOOLEAN
+            type: DataTypes.BOOLEAN,
+            defaultValue: 0
         }
     });
     return user;
