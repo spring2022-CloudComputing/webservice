@@ -89,7 +89,7 @@ async function createUser(req, res, next) {
                     Item: {
                         'Email': udata.username,
                         'Token': randomnanoID,
-                        'TimeToLive': expiryTime.toString(),
+                        'TimeToLive': new Date().getTime(),
                     }
                 };
                 console.log('after user');
