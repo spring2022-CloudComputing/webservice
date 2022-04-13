@@ -13,203 +13,205 @@ const sdc = new SDC({
 });
 const AWS = require('aws-sdk');
 AWS.config.update({
-    region: process.env.AWS_REGION
+    region: process.env.AWS_REGION || 'us-east-1'
 });
 var sns = new AWS.SNS({});
 
 // Create a User
 
 async function createUser(req, res, next) {
-    // var hash = await bcrypt.hash(req.body.password, 10);
-    // const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
-    // if (!emailRegex.test(req.body.username)) {
-    //     logger.info("/create user 400");
-    //     res.status(400).send({
-    //         message: 'Enter your Email ID in correct format. Example: abc@xyz.com'
-    //     });
-    // }
-    // const getUser = await User.findOne({
-    //     where: {
-    //         username: req.body.username
-    //     }
-    // }).catch(err => {
-    //     logger.error("/create user error 500");
-    //     res.status(500).send({
-    //         message: err.message || 'Some error occurred while creating the user'
-    //     });
-    // });
-    // if (getUser) {
-    //     res.status(400).send({
-    //         message: 'User already exists!'
-    //     });
-    // } else {
-    //     var user = {
-    //         id: uuidv4(),
-    //         first_name: req.body.first_name,
-    //         last_name: req.body.last_name,
-    //         password: hash,
-    //         username: req.body.username,
-    //         isVerified: 0
-    //     };
-    //     console.log('above user');
-    //     User.create(user).then(udata => {
-    //             console.log('after user');
-    //             let link = ' http://demo.harshaljaiswal.me/v1/verifyUserEmail?email=' + udata.id + '&token=' + uuidv4();
-    //             const data_link = {
-    //                 email: udata.id,
-    //                 link: link
-    //             }
-
-    //             const params = {
-
-    //                 Message: JSON.stringify(data_link),
-    //                 TopicArn: 'arn:aws:sns:us-east-1:861022598256:verify_email:9ea6311f-e589-4175-ae3e-961c4865ce4f'
-
-    //             }
-    //             await SNS.publish(params).promise();
-    //             then(
-    //                 function (data) {
-
-    //                     console.log(`Message sent to the topic ${params.TopicArn}`);
-    //                     console.log("MessageID is " + data.MessageId);
-    //                     // res.status(204).send();
-    //                     logger.info("/create user 201");
-    //                     logger.info("Message sent to the topic ${params.TopicArn}");
-    //                     sdc.increment('endpoint.userCreate');
-    //                     res.status(201).send({
-    //                         id: udata.id,
-    //                         first_name: udata.first_name,
-    //                         last_name: udata.last_name,
-    //                         username: udata.username,
-    //                         account_created: udata.createdAt,
-    //                         account_updated: udata.updatedAt,
-    //                         isVerified: udata.isVerified
-    //                     });
-
-    //                 }).catch(
-
-    //                 function (err) {
-    //                     console.error(err, err.stack);
-    //                     res.status(500).send(err);
-
-    //                 });
-
-    //         })
-    //         .catch(err => {
-    //             logger.error(" Error while creating the user! 500");
-    //             res.status(500).send({
-    //                 message: err.message || "Some error occurred while creating the user!"
-    //             });
-    //         });
-    // }
-    try {
-
-        if (!request.body || !request.body.username || !request.body.first_name || !request.body.last_name || !request.body.password) {
-
-            let response = {
-                statusCode: 400,
-                message: "Bad Request"
-            };
-            return response;
-        }
-
-        if (request.body.password) {
-            const encryptedPass = bcrypt.hashSync(request.body.password, 10);
-            request.body.password = encryptedPass;
-        }
-
-        const newUser1 = new User(request.body);
-        if (!emailValidator.validate(request.body.username)) {
-            const profileResponse = {
-                statusCode: 400,
-                message: "Bad Request"
-            };
-            return profileResponse;
-        }
-
-        let profileExists = await User.findOne({
-            where: {
-                username: request.body.username
-            }
-        })
-
-        if (profileExists) {
-
-            const profileResponse = {
-                statusCode: 400,
-                message: "Bad Request"
-            };
-            return profileResponse;
-        }
-
-        //in case of a new user
-        else {
-            const response = await newUser1.save();
-            //To send message to Dynamo DB
-            var dynamoDatabase = new AWS.DynamoDB({
-                apiVersion: '2012-08-10',
-                region: 'us-east-1'
-            });
-            const initialTime = Math.round(Date.now() / 1000);
-            const expiryTime = initialTime + 4 * 60;
-            const randomnanoID = uuidv4();
-
-            // Create the Service interface for dynamoDB
-            var parameter = {
-                TableName: 'myDynamoTokenTable',
-                Item: {
-                    'Token': {
-                        S: randomnanoID
-                    },
-                    'TimeToLive': {
-                        N: expiryTime.toString()
-                    }
-                }
-            };
-
-            //saving the token onto the dynamo DB
-            await dynamoDatabase.putItem(parameter).promise();
-
-            //To send message onto SNS
-            //var sns = new AWS.SNS({apiVersion: '2010-03-31'});
-
-            // Create publish parameters
-            var params = {
-                Message: response.username,
-                Subject: randomnanoID,
-                TopicArn: 'arn:aws:sns:us-east-1:861022598256:verify_email:9ea6311f-e589-4175-ae3e-961c4865ce4f'
-
-            };
-
-            //var topicARN= 'arn:aws:sns:us-east-1:172869529067:VerifyingEmail';
-
-            var publishTextPromise = new AWS.SNS({
-                apiVersion: '2010-03-31',
-                region: 'us-east-1'
-            });
-            await publishTextPromise.publish(params).promise();
-
-            //returning response of the creating user.
-            const returnProfile = {
-                statusCode: 200,
-                message: {
-                    id: response.id,
-                    first_name: response.first_name,
-                    last_name: response.last_name,
-                    username: response.username,
-                    account_created: response.createdAt,
-                    account_updated: response.updatedAt
-                }
-            };
-            return returnProfile;
-        }
-    } catch (e) {
-        let response1 = {
-            statusCode: 500,
-            message: e.message
-        };
-        return response1;
+    console.log('create userrr')
+    var hash = await bcrypt.hash(req.body.password, 10);
+    const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+    if (!emailRegex.test(req.body.username)) {
+        logger.info("/create user 400");
+        res.status(400).send({
+            message: 'Enter your Email ID in correct format. Example: abc@xyz.com'
+        });
     }
+    const getUser = await User.findOne({
+        where: {
+            username: req.body.username
+        }
+    }).catch(err => {
+        logger.error("/create user error 500");
+        res.status(500).send({
+            message: err.message || 'Some error occurred while creating the user'
+        });
+    });
+    if (getUser) {
+        res.status(400).send({
+            message: 'User already exists!'
+        });
+    } else {
+        var user = {
+            id: uuidv4(),
+            first_name: req.body.first_name,
+            last_name: req.body.last_name,
+            password: hash,
+            username: req.body.username,
+            isVerified: false
+        };
+        console.log('above user');
+        User.create(user).then(udata => {
+                console.log('after user');
+                let link = ' http://demo.harshaljaiswal.me/v1/verifyUserEmail?email=' + udata.id + '&token=' + uuidv4();
+                const data_link = {
+                    email: udata.id,
+                    link: link
+                }
+                console.log('data_link',JSON.stringify(data_link))
+
+                const params = {
+
+                    Message: JSON.stringify(data_link),
+                    TargetArn: 'arn:aws:sns:us-east-1:861022598256:verify_email:9ea6311f-e589-4175-ae3e-961c4865ce4f'
+
+                }
+                sns.publish(params).promise().
+                then(
+                    function (data) {
+
+                        console.log(`Message sent to the topic ${params.TopicArn}`);
+                        console.log("MessageID is " + data.MessageId);
+                        res.status(204).send();
+                        logger.info("/create user 201");
+                        logger.info(`Message sent to the topic ${params.TopicArn}`);
+                        sdc.increment('endpoint.userCreate');
+                        res.status(201).send({
+                            id: udata.id,
+                            first_name: udata.first_name,
+                            last_name: udata.last_name,
+                            username: udata.username,
+                            account_created: udata.createdAt,
+                            account_updated: udata.updatedAt,
+                            isVerified: udata.isVerified
+                        });
+
+                    }).catch(
+
+                    function (err) {
+                        console.error(err, err.stack);
+                        res.status(500).send(err);
+
+                    });
+
+            })
+            .catch(err => {
+                logger.error(" Error while creating the user! 500");
+                res.status(500).send({
+                    message: err.message || "Some error occurred while creating the user!"
+                });
+            });
+    }
+    // try {
+
+    //     if (!request.body || !request.body.username || !request.body.first_name || !request.body.last_name || !request.body.password) {
+
+    //         let response = {
+    //             statusCode: 400,
+    //             message: "Bad Request"
+    //         };
+    //         return response;
+    //     }
+
+    //     if (request.body.password) {
+    //         const encryptedPass = bcrypt.hashSync(request.body.password, 10);
+    //         request.body.password = encryptedPass;
+    //     }
+
+    //     const newUser1 = new User(request.body);
+    //     if (!emailValidator.validate(request.body.username)) {
+    //         const profileResponse = {
+    //             statusCode: 400,
+    //             message: "Bad Request"
+    //         };
+    //         return profileResponse;
+    //     }
+
+    //     let profileExists = await User.findOne({
+    //         where: {
+    //             username: request.body.username
+    //         }
+    //     })
+
+    //     if (profileExists) {
+
+    //         const profileResponse = {
+    //             statusCode: 400,
+    //             message: "Bad Request"
+    //         };
+    //         return profileResponse;
+    //     }
+
+    //     //in case of a new user
+    //     else {
+    //         const response = await newUser1.save();
+    //         //To send message to Dynamo DB
+    //         var dynamoDatabase = new AWS.DynamoDB({
+    //             apiVersion: '2012-08-10',
+    //             region: 'us-east-1'
+    //         });
+    //         const initialTime = Math.round(Date.now() / 1000);
+    //         const expiryTime = initialTime + 4 * 60;
+    //         const randomnanoID = uuidv4();
+
+    //         // Create the Service interface for dynamoDB
+    //         var parameter = {
+    //             TableName: 'myDynamoTokenTable',
+    //             Item: {
+    //                 'Token': {
+    //                     S: randomnanoID
+    //                 },
+    //                 'TimeToLive': {
+    //                     N: expiryTime.toString()
+    //                 }
+    //             }
+    //         };
+
+    //         //saving the token onto the dynamo DB
+    //         await dynamoDatabase.putItem(parameter).promise();
+
+    //         //To send message onto SNS
+    //         //var sns = new AWS.SNS({apiVersion: '2010-03-31'});
+
+    //         // Create publish parameters
+    //         var params = {
+    //             Message: response.username,
+    //             Subject: randomnanoID,
+    //             TopicArn: 'arn:aws:sns:us-east-1:861022598256:verify_email:9ea6311f-e589-4175-ae3e-961c4865ce4f'
+
+    //         };
+
+    //         //var topicARN= 'arn:aws:sns:us-east-1:172869529067:VerifyingEmail';
+
+    //         var publishTextPromise = new AWS.SNS({
+    //             apiVersion: '2010-03-31',
+    //             region: 'us-east-1'
+    //         });
+    //         await publishTextPromise.publish(params).promise();
+
+    //         //returning response of the creating user.
+    //         const returnProfile = {
+    //             statusCode: 200,
+    //             message: {
+    //                 id: response.id,
+    //                 first_name: response.first_name,
+    //                 last_name: response.last_name,
+    //                 username: response.username,
+    //                 account_created: response.createdAt,
+    //                 account_updated: response.updatedAt
+    //             }
+    //         };
+    //         return returnProfile;
+    //     }
+    // } catch (e) {
+    //     let response1 = {
+    //         statusCode: 500,
+    //         message: e.message
+    //     };
+    //     return response1;
+    // }
 }
 
 //Get a User
