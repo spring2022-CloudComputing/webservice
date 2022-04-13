@@ -269,6 +269,7 @@ async function createUser(req, res, next) {
 
 // Verify user
 async function verifyUser(req, res, next) {
+    console.log(req.email);
     const user = await getUserByUsername(req.email);
     if (user) {
         logger.info("get user 200");
