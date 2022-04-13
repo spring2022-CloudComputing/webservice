@@ -94,7 +94,7 @@ async function createUser(req, res, next) {
                 };
 
                 //saving the token onto the dynamo DB
-                await dynamoDatabase.putItem(parameter).promise();
+                // await dynamoDatabase.putItem(parameter).promise();
 
                 var msg ={
                     'username': udata.username,
