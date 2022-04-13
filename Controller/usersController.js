@@ -87,7 +87,7 @@ async function createUser(req, res, next) {
                 var parameter = {
                     TableName: 'csye6225',
                     Item: {
-                        'Email':  {
+                        'email':  {
                             S: udata.username
                         },
                         'Token': {
