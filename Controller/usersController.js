@@ -90,10 +90,11 @@ async function createUser(req, res, next) {
 
                     Message: udata.id,
                     Subject: randomnanoID,
-                    TargetArn: 'arn:aws:sns:us-east-1:861022598256:verify_email:9ea6311f-e589-4175-ae3e-961c4865ce4f'
+                    // TargetArn: 'arn:aws:sns:us-east-1:861022598256:verify_email:9ea6311f-e589-4175-ae3e-961c4865ce4f'
+                    TopicArn: 'arn:aws:sns:us-east-1:861022598256:verify_email'
 
                 }
-                await sns.publish(params).promise();
+                var publishTextPromise = await sns.publish(params).promise();
 
                 console.log('publishTextPromise', publishTextPromise);
                 res.status(201).send({
