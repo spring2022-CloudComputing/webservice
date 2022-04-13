@@ -17,6 +17,11 @@ AWS.config.update({
 });
 var sns = new AWS.SNS({});
 
+// //Delete all User
+// async function deleteAllUser(req, res, next){
+    
+// }
+
 // Create a User
 
 async function createUser(req, res, next) {
@@ -70,7 +75,7 @@ async function createUser(req, res, next) {
 
                 // Create the Service interface for dynamoDB
                 var parameter = {
-                    TableName: 'myDynamoTokenTable',
+                    TableName: 'csye6225',
                     Item: {
                         'Token': {
                             S: randomnanoID
