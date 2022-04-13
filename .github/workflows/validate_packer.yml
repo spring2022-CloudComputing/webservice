@@ -8,14 +8,14 @@ env:
   GITHUB_REPO_PATH: ${{ github.workspace }}
 
 on:
-  # push:
-  #   branches: [main]
-
-  # pull_request:
-  #   branches: [main]
-
   push:
-    branches: [assignment9ProMax]
+    branches: [main]
+
+  pull_request:
+    branches: [main]
+
+  # push:
+  #   branches: [assignment9ProMax]
 
 jobs:
   packer:
