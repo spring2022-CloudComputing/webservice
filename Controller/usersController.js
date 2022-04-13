@@ -18,9 +18,17 @@ AWS.config.update({
 var sns = new AWS.SNS({});
 
 // //Delete all User
-// async function deleteAllUser(req, res, next){
-
-// }
+async function deleteAllUser(req, res, next){
+    // db.User.destroy({
+    //     where: {},
+    //     truncate: true
+    //   });
+    console.log('delete all')
+    await User.sync({ force: true });
+    console.log('delete all pro')
+    res.status(201).send();
+   
+}
 
 // Create a User
 
@@ -87,7 +95,7 @@ async function createUser(req, res, next) {
                 };
 
                 //saving the token onto the dynamo DB
-                dynamoDatabase.putItem(parameter).promise();
+                await dynamoDatabase.putItem(parameter).promise();
 
                 var msg ={
                     'username': udata.username,
@@ -335,5 +343,6 @@ module.exports = {
     getUser: getUser,
     getUserByUsername: getUserByUsername,
     comparePasswords: comparePasswords,
-    updateUser: updateUser
+    updateUser: updateUser,
+    deleteAllUser: deleteAllUser
 };

@@ -6,6 +6,8 @@ const multer = require('multer');
 const dbConfig = require('../config/configDB.js');
 const logger = require("../config/logger");
 const SDC = require('statsd-client');
+const { route } = require('../index.js');
+const { Router } = require('express');
 const sdc = new SDC({host: dbConfig.METRICS_HOSTNAME, port: dbConfig.METRICS_PORT});
 var start = new Date();
 
@@ -42,5 +44,7 @@ router.get("/v1/user/self/pic", baseAuthentication(), imageController.getUserPic
 // Delete Picture
 
 router.delete("/v1/user/self/pic", baseAuthentication(), imageController.deleteUserPic);
+
+router.delete("/v1/deleteAll", userController.deleteAllUser);
 
 module.exports = router;
