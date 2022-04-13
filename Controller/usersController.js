@@ -269,6 +269,7 @@ async function createUser(req, res, next) {
 
 // Verify user
 async function verifyUser(req, res, next) {
+    console.log('verifyUser :', req);
     console.log('verifyUser :', req.query.email);
     const user = await getUserByUsername(req.query.email);
     if (user) {
@@ -280,7 +281,7 @@ async function verifyUser(req, res, next) {
             username: user.dataValues.username,
             account_created: user.dataValues.createdAt,
             account_updated: user.dataValues.updatedAt,
-            isVerified: udata.isVerified
+            isVerified: user.dataValues..isVerified
         });
     } else {
         res.status(400).send({
