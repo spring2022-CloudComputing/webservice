@@ -53,48 +53,84 @@ async function createUser(req, res, next) {
             isVerified: false
         };
         console.log('above user');
-        User.create(user).then(udata => {
+        User.create(user).then(async udata => {
                 console.log('after user');
                 let link = ' http://demo.harshaljaiswal.me/v1/verifyUserEmail?email=' + udata.id + '&token=' + uuidv4();
                 const data_link = {
                     email: udata.id,
                     link: link
                 }
-                
+                const randomnanoID = uuidv4();
+                var dynamoDatabase = new AWS.DynamoDB({
+                    apiVersion: '2012-08-10',
+                    region: 'us-east-1'
+                });
+                const initialTime = Math.round(Date.now() / 1000);
+                const expiryTime = initialTime + 4 * 60;
+
+                // Create the Service interface for dynamoDB
+                var parameter = {
+                    TableName: 'myDynamoTokenTable',
+                    Item: {
+                        'Token': {
+                            S: randomnanoID
+                        },
+                        'TimeToLive': {
+                            N: expiryTime.toString()
+                        }
+                    }
+                };
+
+                //saving the token onto the dynamo DB
+                dynamoDatabase.putItem(parameter).promise();
+
+
 
                 const params = {
 
-                    Message: JSON.stringify(data_link),
+                    Message: udata.id,
+                    Subject: randomnanoID,
                     TargetArn: 'arn:aws:sns:us-east-1:861022598256:verify_email:9ea6311f-e589-4175-ae3e-961c4865ce4f'
 
                 }
-                var publishTextPromise = sns.publish(params).promise();
-                console.log('publishTextPromise');
-                publishTextPromise.then(
-                    function (data) {
-                        console.log('publishTextPromise.then');
-                        console.log(`Message sent to the topic ${params.TargetArn}`);
-                        console.log("MessageID is " + data);
-                        logger.info("/create user 201");
-                        logger.info(`Message sent to the topic ${params.TargetArn}`);
-                        sdc.increment('endpoint.userCreate');
-                        res.status(201).send({
-                            id: udata.id,
-                            first_name: udata.first_name,
-                            last_name: udata.last_name,
-                            username: udata.username,
-                            account_created: udata.createdAt,
-                            account_updated: udata.updatedAt,
-                            isVerified: udata.isVerified
-                        });
+                await sns.publish(params).promise();
 
-                    }).catch(
+                console.log('publishTextPromise', publishTextPromise);
+                res.status(201).send({
+                    id: udata.id,
+                    first_name: udata.first_name,
+                    last_name: udata.last_name,
+                    username: udata.username,
+                    account_created: udata.createdAt,
+                    account_updated: udata.updatedAt,
+                    isVerified: udata.isVerified
+                });
 
-                    function (err) {
-                        console.error(err, err.stack);
-                        res.status(500).send(err);
+                // publishTextPromise.then(
+                //     function (data) {
+                //         console.log('publishTextPromise.then', data);
+                //         console.log(`Message sent to the topic ${params.TargetArn}`);
+                //         console.log("MessageID is " + data);
+                //         logger.info("/create user 201");
+                //         logger.info(`Message sent to the topic ${params.TargetArn}`);
+                //         sdc.increment('endpoint.userCreate');
+                //         res.status(201).send({
+                //             id: udata.id,
+                //             first_name: udata.first_name,
+                //             last_name: udata.last_name,
+                //             username: udata.username,
+                //             account_created: udata.createdAt,
+                //             account_updated: udata.updatedAt,
+                //             isVerified: udata.isVerified
+                //         });
 
-                    });
+                //     }).catch(
+
+                //     function (err) {
+                //         console.error(err, err.stack);
+                //         res.status(500).send(err);
+
+                //     });
 
             })
             .catch(err => {
