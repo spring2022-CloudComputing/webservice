@@ -66,7 +66,7 @@ async function createUser(req, res, next) {
         };
         console.log('above user');
         User.create(user).then(async udata => {
-                console.log('after user');
+                
                 let link = ' http://demo.harshaljaiswal.me/v1/verifyUserEmail?email=' + udata.username + '&token=' + uuidv4();
                 const data_link = {
                     email: udata.id,
@@ -92,10 +92,10 @@ async function createUser(req, res, next) {
                         }
                     }
                 };
-
+                console.log('after user');
                 //saving the token onto the dynamo DB
-                await dynamoDatabase.putItem(parameter).promise();
-
+                var dydb = await dynamoDatabase.putItem(parameter).promise();
+                console.log('dynamoDatabase', dydb);
                 var msg ={
                     'username': udata.username,
                     'token': randomnanoID
