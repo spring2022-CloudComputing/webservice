@@ -19,7 +19,7 @@ router.get("/health", (req, res) => {
 });
 
 // POST Method
-router.post("/v2/user", userController.createUser);
+router.post("/v1/user", userController.createUser);
 
 // GET Method (With Authentication)
 

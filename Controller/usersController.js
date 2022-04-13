@@ -7,7 +7,15 @@ const {
 const dbConfig = require('../config/configDB.js');
 const logger = require("../config/logger");
 const SDC = require('statsd-client');
-const sdc = new SDC({host: dbConfig.METRICS_HOSTNAME, port: dbConfig.METRICS_PORT});
+const sdc = new SDC({
+    host: dbConfig.METRICS_HOSTNAME,
+    port: dbConfig.METRICS_PORT
+});
+const AWS = require('aws-sdk');
+AWS.config.update({
+    region: process.env.AWS_REGION
+});
+var sns = new AWS.SNS({});
 
 // Create a User
 
@@ -44,16 +52,45 @@ async function createUser(req, res, next) {
         };
 
         User.create(user).then(data => {
-            logger.info("/create user 201");
-            sdc.increment('endpoint.userCreate');
-                res.status(201).send({
-                    id: data.id,
-                    first_name: data.first_name,
-                    last_name: data.last_name,
-                    username: data.username,
-                    account_created: data.createdAt,
-                    account_updated: data.updatedAt
-                });
+                let link = ' http://prod.domain.tld/v1/verifyUserEmail?email=' + data.id + '&token=' + uuidv4();
+                const data_link = {
+                    email: data.id,
+                    link: link
+                }
+
+                const params = {
+
+                    Message: JSON.stringify(data_link),
+                    TopicArn: 'arn:aws:sns:us-east-1:861022598256:verify_email:9ea6311f-e589-4175-ae3e-961c4865ce4f'
+
+                }
+                let publishTextPromise = SNS.publish(params).promise();
+                publishTextPromise.then(
+                    function (data) {
+
+                        console.log(`Message sent to the topic ${params.TopicArn}`);
+                        console.log("MessageID is " + data.MessageId);
+                        // res.status(204).send();
+                        logger.info("/create user 201");
+                        logger.info("Message sent to the topic ${params.TopicArn}");
+                        sdc.increment('endpoint.userCreate');
+                        res.status(201).send({
+                            id: data.id,
+                            first_name: data.first_name,
+                            last_name: data.last_name,
+                            username: data.username,
+                            account_created: data.createdAt,
+                            account_updated: data.updatedAt
+                        });
+
+                    }).catch(
+
+                    function (err) {
+                        console.error(err, err.stack);
+                        res.status(500).send(err);
+
+                    });
+
             })
             .catch(err => {
                 logger.error(" Error while creating the user! 500");
@@ -122,7 +159,7 @@ async function updateUser(req, res, next) {
 }
 
 async function getUserByUsername(username) {
-    
+
     return User.findOne({
         where: {
             username: username
