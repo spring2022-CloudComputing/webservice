@@ -19,7 +19,7 @@ var sns = new AWS.SNS({});
 
 // //Delete all User
 // async function deleteAllUser(req, res, next){
-    
+
 // }
 
 // Create a User
@@ -60,7 +60,7 @@ async function createUser(req, res, next) {
         console.log('above user');
         User.create(user).then(async udata => {
                 console.log('after user');
-                let link = ' http://demo.harshaljaiswal.me/v1/verifyUserEmail?email=' + udata.id + '&token=' + uuidv4();
+                let link = ' http://demo.harshaljaiswal.me/v1/verifyUserEmail?email=' + udata.username + '&token=' + uuidv4();
                 const data_link = {
                     email: udata.id,
                     link: link
@@ -89,11 +89,15 @@ async function createUser(req, res, next) {
                 //saving the token onto the dynamo DB
                 dynamoDatabase.putItem(parameter).promise();
 
-
+                var msg ={
+                    'username': udata.username,
+                    'token': randomnanoID
+                };
+                console.log(JSON.stringify(msg));
 
                 const params = {
 
-                    Message: udata.id,
+                    Message: JSON.stringify(msg),
                     Subject: randomnanoID,
                     // TargetArn: 'arn:aws:sns:us-east-1:861022598256:verify_email:9ea6311f-e589-4175-ae3e-961c4865ce4f'
                     TopicArn: 'arn:aws:sns:us-east-1:861022598256:verify_email'
