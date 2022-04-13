@@ -31,7 +31,6 @@ async function deleteAllUser(req, res, next){
 }
 
 // Create a User
-
 async function createUser(req, res, next) {
     console.log('create userrr')
     var hash = await bcrypt.hash(req.body.password, 10);
@@ -268,8 +267,27 @@ async function createUser(req, res, next) {
     // }
 }
 
-//Get a User
+// Verify user
+async function verifyUser(req, res, next) {
+    const user = await getUserByUsername(req.email);
+    if (user) {
+        logger.info("get user 200");
+        res.status(200).send({
+            id: user.dataValues.id,
+            first_name: user.dataValues.first_name,
+            last_name: user.dataValues.last_name,
+            username: user.dataValues.username,
+            account_created: user.dataValues.createdAt,
+            account_updated: user.dataValues.updatedAt
+        });
+    } else {
+        res.status(400).send({
+            message: 'User not found!'
+        });
+    }
+}
 
+//Get a User
 async function getUser(req, res, next) {
     const user = await getUserByUsername(req.user.username);
     if (user) {
@@ -344,5 +362,6 @@ module.exports = {
     getUserByUsername: getUserByUsername,
     comparePasswords: comparePasswords,
     updateUser: updateUser,
-    deleteAllUser: deleteAllUser
+    deleteAllUser: deleteAllUser,
+    verifyUser: verifyUser
 };
