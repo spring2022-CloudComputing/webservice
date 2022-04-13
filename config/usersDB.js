@@ -15,11 +15,11 @@ module.exports = (sequelize, Sequelize) => {
         },
         username: {
             type: Sequelize.STRING
-        },
-        isVerified: {
-            type: Sequelize.BOOLEAN,
-            defaultValue: 0
         }
+        // isVerified: {
+        //     type: Sequelize.BOOLEAN,
+        //     defaultValue: 0
+        // }
     });
     return user;
 };
