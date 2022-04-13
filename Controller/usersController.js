@@ -82,7 +82,8 @@ async function createUser(req, res, next) {
                             last_name: udata.last_name,
                             username: udata.username,
                             account_created: udata.createdAt,
-                            account_updated: udata.updatedAt
+                            account_updated: udata.updatedAt,
+                            isVerified: udata.isVerified
                         });
 
                     }).catch(
