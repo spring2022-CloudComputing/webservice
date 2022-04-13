@@ -87,9 +87,15 @@ async function createUser(req, res, next) {
                 var parameter = {
                     TableName: 'csye6225',
                     Item: {
-                        'Email': udata.username,
-                        'Token': randomnanoID,
-                        'TimeToLive': new Date().getTime(),
+                        'Email':  {
+                            S: udata.username
+                        },
+                        'Token': {
+                            S: randomnanoID
+                        },
+                        'TimeToLive': {
+                            N: expiryTime.toString()
+                        }
                     }
                 };
                 console.log('after user');
