@@ -154,12 +154,10 @@ async function verifyUser(req, res, next) {
             var params = {
                 TableName: 'csye6225Pro2',
                 Key: {
-                    'Email': {
-                        S: req.query.email
-                    }
+                    'Email': req.query.email
                 }
             };
-
+            console.log('got user  param:');
             // Call DynamoDB to read the item from the table
             dynamoDatabase.getItem(params, function (err, data) {
                 if (err) {
