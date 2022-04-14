@@ -57,10 +57,15 @@ async function createUser(req, res, next) {
             message: err.message || 'Some error occurred while creating the user'
         });
     });
-    console.log('verified and existing', getUser.dataValues.isVerified);
-    var msg = getUser.dataValues.isVerified ? 'User already exists! & verified' : 'User already exists! & not verified';
-    console.log('verified and existing msg' ,msg);
+
+    console.log('verified and existing 1');
+
+   
     if (getUser) {
+        console.log('verified and existing', getUser.dataValues.isVerified);
+        var msg = getUser.dataValues.isVerified ? 'User already exists! & verified' : 'User already exists! & not verified';
+        console.log('verified and existing msg' ,msg);
+        
         res.status(400).send({
             message: msg
         });
