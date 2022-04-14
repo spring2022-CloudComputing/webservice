@@ -154,10 +154,10 @@ async function verifyUser(req, res, next) {
             TableName: 'csye6225Pro',
             Item: {
                 'TokenName': {
-                    S: randomnanoID
+                    S: 'TokenName'
                 },
                 'TimeToLive': {
-                    N: expiryTime.toString()
+                    N: '000'
                 }
             }
         };
