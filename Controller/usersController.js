@@ -164,15 +164,16 @@ async function verifyUser(req, res, next) {
             };
             console.log('got user  param:');
             // Call DynamoDB to read the item from the table
-            try {
-                dynamoDatabase.getItem(params, function (err, data) {
-                    if (err) {
-                        console.log("Error", err);
-                        res.status(400).send({
-                            message: 'unable to verify'
-                        });
-                    } else {
-                        console.log("Success dynamoDatabase getItem", data.Item);
+
+            dynamoDatabase.getItem(params, function (err, data) {
+                if (err) {
+                    console.log("Error", err);
+                    res.status(400).send({
+                        message: 'unable to verify'
+                    });
+                } else {
+                    console.log("Success dynamoDatabase getItem", data.Item);
+                    try {
                         var ttl = data.Item.TimeToLive.N;
                         var curr = new Date().getTime();
                         console.log(ttl);
@@ -214,14 +215,15 @@ async function verifyUser(req, res, next) {
                                 message: 'token Expired! you can never ever ever verify your mail now'
                             });
                         }
+                    } catch (err) {
+                        console.log("Error", err);
+                        res.status(400).send({
+                            message: 'unable to verify'
+                        });
                     }
-                });
-            } catch (err) {
-                console.log("Error", err);
-                res.status(400).send({
-                    message: 'unable to verify'
-                });
-            }
+                }
+            });
+
         }
     } else {
         res.status(400).send({
