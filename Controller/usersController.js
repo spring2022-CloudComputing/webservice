@@ -79,7 +79,7 @@ async function createUser(req, res, next) {
                     link: link
                 }
                 const randomnanoID = uuidv4();
-               
+
                 const initialTime = Math.round(Date.now() / 1000);
                 const expiryTime = new Date().getTime();
                 //initialTime + 4 * 60;
@@ -149,7 +149,7 @@ async function verifyUser(req, res, next) {
     console.log('verifyUser :', req.query.email);
     const user = await getUserByUsername(req.query.email);
     if (user) {
-        
+
         var params = {
             TableName: 'csye6225Pro',
             Key: {
@@ -159,25 +159,52 @@ async function verifyUser(req, res, next) {
             }
         };
 
-          // Call DynamoDB to read the item from the table
-          dynamoDatabase.getItem(params, function(err, data) {
+        // Call DynamoDB to read the item from the table
+        dynamoDatabase.getItem(params, function (err, data) {
             if (err) {
-              console.log("Error", err);
+                console.log("Error", err);
             } else {
-              console.log("Success dynamoDatabase getItem", data.Item);
-              var ttl = data.Item.TimeToLive.N;
-              var curr = new Date().getTime();
-              console.log(ttl);
-              console.log('time diffrence',curr - ttl);
-              var time = (curr - ttl )/60000; 
-              console.log('time diffrence ',time);
+                console.log("Success dynamoDatabase getItem", data.Item);
+                var ttl = data.Item.TimeToLive.N;
+                var curr = new Date().getTime();
+                console.log(ttl);
+                console.log('time diffrence', curr - ttl);
+                var time = (curr - ttl) / 60000;
+                console.log('time diffrence ', time);
+                if (time < 5) {
+                    User.update({
+                        isVerified: true,
+                    }, {
+                        where: {
+                            username: req.query.email
+                        }
+                    }).then((result) => {
+                        if (result == 1) {
+                            logger.info("update user 204");
+                            sdc.increment('endpoint.userUpdate');
+                            res.status(200).send({
+                                message: 'Successfully Verified!'
+                            });
+                        } else {
+                            res.status(400).send({
+                                message: 'unable to verify'
+                            });
+                        }
+                    }).catch(err => {
+                        res.status(500).send({
+                            message: 'Error Updating the user'
+                        });
+                    });
+                } else {
+                    res.status(400).send({
+                        message: 'token Expired! you can never ever ever verify your mail now'
+                    });
+                }
 
-              res.status(200).send({
-                message: time
-            });
+
 
             }
-          });
+        });
     } else {
         res.status(400).send({
             message: 'User not found!'
