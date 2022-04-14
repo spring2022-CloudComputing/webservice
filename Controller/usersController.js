@@ -58,9 +58,11 @@ async function createUser(req, res, next) {
         });
     });
     console.log('verified and existing', getUser.dataValues.isVerified);
+    var msg = getUser.dataValues.isVerified ? 'User already exists! & verified' : 'User already exists! & not verified';
+    console.log('verified and existing msg' ,msg);
     if (getUser) {
         res.status(400).send({
-            message: getUser.dataValues.isVerified ? 'User already exists! & verified' : 'User already exists! & not verified'
+            message: msg
         });
     } else {
         var user = {
