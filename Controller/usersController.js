@@ -79,7 +79,7 @@ async function createUser(req, res, next) {
 
                 // Create the Service interface for dynamoDB
                 var parameter = {
-                    TableName: 'csye6225Pro',
+                    TableName: 'csye6225Pro2',
                     Item: {
                         'Email': {
                             S: udata.username
@@ -144,7 +144,7 @@ async function verifyUser(req, res, next) {
     console.log('verifyUser :', req.query.email);
     const user = await getUserByUsername(req.query.email);
     if (user) {
-
+        console.log('got user  :', req);
         if (user.dataValues.isVerified) {
             res.status(202).send({
                 message: 'Already Successfully Verified!'
@@ -152,7 +152,7 @@ async function verifyUser(req, res, next) {
         } else {
 
             var params = {
-                TableName: 'csye6225Pro',
+                TableName: 'csye6225Pro2',
                 Key: {
                     'TokenName': {
                         S: req.query.token
@@ -201,9 +201,6 @@ async function verifyUser(req, res, next) {
                             message: 'token Expired! you can never ever ever verify your mail now'
                         });
                     }
-
-
-
                 }
             });
         }
