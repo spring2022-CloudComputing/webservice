@@ -13,13 +13,32 @@ const sdc = new SDC({
 });
 const AWS = require('aws-sdk');
 AWS.config.update({
-    region: process.env.AWS_REGION
+    region: process.env.AWS_REGION || 'us-east-1'
 });
 var sns = new AWS.SNS({});
+var dynamoDatabase = new AWS.DynamoDB({
+    apiVersion: '2012-08-10',
+    region: process.env.AWS_REGION || 'us-east-1'
+});
+
+// //Delete all User
+async function deleteAllUser(req, res, next) {
+    // db.User.destroy({
+    //     where: {},
+    //     truncate: true
+    //   });
+    console.log('delete all')
+    await User.sync({
+        force: true
+    });
+    console.log('delete all pro')
+    res.status(201).send();
+
+}
 
 // Create a User
-
 async function createUser(req, res, next) {
+    console.log('create userrr')
     var hash = await bcrypt.hash(req.body.password, 10);
     const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
     if (!emailRegex.test(req.body.username)) {
@@ -51,46 +70,67 @@ async function createUser(req, res, next) {
             username: req.body.username,
             isVerified: false
         };
+        console.log('above user');
+        User.create(user).then(async udata => {
 
-        User.create(user).then(data => {
-                let link = ' http://prod.domain.tld/v1/verifyUserEmail?email=' + data.id + '&token=' + uuidv4();
+                let link = ' http://demo.harshaljaiswal.me/v1/verifyUserEmail?email=' + udata.username + '&token=' + uuidv4();
                 const data_link = {
-                    email: data.id,
+                    email: udata.id,
                     link: link
                 }
+                const randomnanoID = uuidv4();
+
+                const initialTime = Math.round(Date.now() / 1000);
+                const expiryTime = new Date().getTime();
+                //initialTime + 4 * 60;
+
+                // Create the Service interface for dynamoDB
+                var parameter = {
+                    TableName: 'csye6225Pro',
+                    Item: {
+                        'TokenName': {
+                            S: randomnanoID
+                        },
+                        'TimeToLive': {
+                            N: expiryTime.toString()
+                        }
+                    }
+                };
+                console.log('after user');
+                //saving the token onto the dynamo DB
+                try {
+                    var dydb = await dynamoDatabase.putItem(parameter).promise();
+                    console.log('try dynamoDatabase', dydb);
+                } catch (err) {
+                    console.log('err dynamoDatabase', err);
+                }
+
+                console.log('dynamoDatabase', dydb);
+                var msg = {
+                    'username': udata.username,
+                    'token': randomnanoID
+                };
+                console.log(JSON.stringify(msg));
 
                 const params = {
 
-                    Message: JSON.stringify(data_link),
-                    TopicArn: 'arn:aws:sns:us-east-1:861022598256:verify_email:9ea6311f-e589-4175-ae3e-961c4865ce4f'
+                    Message: JSON.stringify(msg),
+                    Subject: randomnanoID,
+                    TopicArn: 'arn:aws:sns:us-east-1:861022598256:verify_email'
 
                 }
-                let publishTextPromise = SNS.publish(params).promise();
-                publishTextPromise.then(
-                    function (data) {
+                var publishTextPromise = await sns.publish(params).promise();
 
-                        console.log(`Message sent to the topic ${params.TopicArn}`);
-                        console.log("MessageID is " + data.MessageId);
-                        // res.status(204).send();
-                        logger.info("/create user 201");
-                        logger.info("Message sent to the topic ${params.TopicArn}");
-                        sdc.increment('endpoint.userCreate');
-                        res.status(201).send({
-                            id: data.id,
-                            first_name: data.first_name,
-                            last_name: data.last_name,
-                            username: data.username,
-                            account_created: data.createdAt,
-                            account_updated: data.updatedAt
-                        });
-
-                    }).catch(
-
-                    function (err) {
-                        console.error(err, err.stack);
-                        res.status(500).send(err);
-
-                    });
+                console.log('publishTextPromise', publishTextPromise);
+                res.status(201).send({
+                    id: udata.id,
+                    first_name: udata.first_name,
+                    last_name: udata.last_name,
+                    username: udata.username,
+                    account_created: udata.createdAt,
+                    account_updated: udata.updatedAt,
+                    isVerified: udata.isVerified
+                });
 
             })
             .catch(err => {
@@ -102,8 +142,76 @@ async function createUser(req, res, next) {
     }
 }
 
-//Get a User
+// Verify user
+async function verifyUser(req, res, next) {
+    console.log('verifyUser :', req);
+    console.log('verifyUser :', req.query.email);
+    const user = await getUserByUsername(req.query.email);
+    if (user) {
 
+        var params = {
+            TableName: 'csye6225Pro',
+            Key: {
+                'TokenName': {
+                    S: req.query.token
+                }
+            }
+        };
+
+        // Call DynamoDB to read the item from the table
+        dynamoDatabase.getItem(params, function (err, data) {
+            if (err) {
+                console.log("Error", err);
+            } else {
+                console.log("Success dynamoDatabase getItem", data.Item);
+                var ttl = data.Item.TimeToLive.N;
+                var curr = new Date().getTime();
+                console.log(ttl);
+                console.log('time diffrence', curr - ttl);
+                var time = (curr - ttl) / 60000;
+                console.log('time diffrence ', time);
+                if (time < 5) {
+                    User.update({
+                        isVerified: true,
+                    }, {
+                        where: {
+                            username: req.query.email
+                        }
+                    }).then((result) => {
+                        if (result == 1) {
+                            logger.info("update user 204");
+                            sdc.increment('endpoint.userUpdate');
+                            res.status(200).send({
+                                message: 'Successfully Verified!'
+                            });
+                        } else {
+                            res.status(400).send({
+                                message: 'unable to verify'
+                            });
+                        }
+                    }).catch(err => {
+                        res.status(500).send({
+                            message: 'Error Updating the user'
+                        });
+                    });
+                } else {
+                    res.status(400).send({
+                        message: 'token Expired! you can never ever ever verify your mail now'
+                    });
+                }
+
+
+
+            }
+        });
+    } else {
+        res.status(400).send({
+            message: 'User not found!'
+        });
+    }
+}
+
+//Get a User
 async function getUser(req, res, next) {
     const user = await getUserByUsername(req.user.username);
     if (user) {
@@ -114,7 +222,8 @@ async function getUser(req, res, next) {
             last_name: user.dataValues.last_name,
             username: user.dataValues.username,
             account_created: user.dataValues.createdAt,
-            account_updated: user.dataValues.updatedAt
+            account_updated: user.dataValues.updatedAt,
+            isVerified: user.dataValues.isVerified
         });
     } else {
         res.status(400).send({
@@ -177,5 +286,7 @@ module.exports = {
     getUser: getUser,
     getUserByUsername: getUserByUsername,
     comparePasswords: comparePasswords,
-    updateUser: updateUser
+    updateUser: updateUser,
+    deleteAllUser: deleteAllUser,
+    verifyUser: verifyUser
 };
