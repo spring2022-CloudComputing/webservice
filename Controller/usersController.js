@@ -57,9 +57,10 @@ async function createUser(req, res, next) {
             message: err.message || 'Some error occurred while creating the user'
         });
     });
+    console.log('verified and existing', getUser.dataValues.isVerified);
     if (getUser) {
         res.status(400).send({
-            message: 'User already exists!' + getUser.dataValues.isVerified ? ' & verified' : '& not verified'
+            message: getUser.dataValues.isVerified ? 'User already exists! & verified' : 'User already exists! & not verified'
         });
     } else {
         var user = {
