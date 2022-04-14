@@ -116,7 +116,6 @@ async function createUser(req, res, next) {
 
                     Message: JSON.stringify(msg),
                     Subject: randomnanoID,
-                    // TargetArn: 'arn:aws:sns:us-east-1:861022598256:verify_email:9ea6311f-e589-4175-ae3e-961c4865ce4f'
                     TopicArn: 'arn:aws:sns:us-east-1:861022598256:verify_email'
 
                 }
