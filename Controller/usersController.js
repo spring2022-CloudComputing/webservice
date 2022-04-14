@@ -158,20 +158,19 @@ async function verifyUser(req, res, next) {
                 }
             }
         };
-        // var params = {
-        //     TableName: 'TABLE',
-        //     Key: {
-        //       'KEY_NAME': {N: '001'}
-        //     },
-        //     ProjectionExpression: 'ATTRIBUTE_NAME'
-        //   };
-          
+
           // Call DynamoDB to read the item from the table
           dynamoDatabase.getItem(params, function(err, data) {
             if (err) {
               console.log("Error", err);
             } else {
-              console.log("Success", data.Item);
+              console.log("Success dynamoDatabase getItem", data.Item);
+              var ttl = data.Item.TimeToLive;
+              console.log(ttl);
+              res.status(200).send({
+                message: ttl
+            });
+
             }
           });
     } else {
