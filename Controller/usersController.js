@@ -154,7 +154,12 @@ async function verifyUser(req, res, next) {
             var params = {
                 TableName: 'csye6225Pro2',
                 Key: {
-                    'Email': req.query.email
+                    'Email': {
+                        S: req.query.email
+                    },
+                    'TokenName': {
+                        S: req.query.token
+                    }
                 }
             };
             console.log('got user  param:');
