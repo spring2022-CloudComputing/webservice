@@ -102,11 +102,12 @@ async function createUser(req, res, next) {
                 //saving the token onto the dynamo DB
                 try {
                     var dydb = await dynamoDatabase.putItem(parameter).promise();
+                    console.log('try dynamoDatabase', dydb);
                 } catch (err) {
-                    console.log('dynamoDatabase', err);
+                    console.log('err dynamoDatabase', err);
                 }
 
-                console.log('dynamoDatabase');
+                console.log('dynamoDatabase', dydb);
                 var msg = {
                     'username': udata.username,
                     'token': randomnanoID
