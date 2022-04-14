@@ -73,21 +73,17 @@ async function createUser(req, res, next) {
         console.log('above user');
         User.create(user).then(async udata => {
 
-                let link = ' http://demo.harshaljaiswal.me/v1/verifyUserEmail?email=' + udata.username + '&token=' + uuidv4();
-                const data_link = {
-                    email: udata.id,
-                    link: link
-                }
                 const randomnanoID = uuidv4();
 
-                const initialTime = Math.round(Date.now() / 1000);
                 const expiryTime = new Date().getTime();
-                //initialTime + 4 * 60;
 
                 // Create the Service interface for dynamoDB
                 var parameter = {
                     TableName: 'csye6225Pro',
                     Item: {
+                        'Email':{
+                            S: udata.username
+                        },
                         'TokenName': {
                             S: randomnanoID
                         },
