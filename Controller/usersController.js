@@ -144,7 +144,7 @@ async function verifyUser(req, res, next) {
     console.log('verifyUser :', req.query.email);
     const user = await getUserByUsername(req.query.email);
     if (user) {
-        console.log('got user  :', req);
+        console.log('got user  :');
         if (user.dataValues.isVerified) {
             res.status(202).send({
                 message: 'Already Successfully Verified!'
