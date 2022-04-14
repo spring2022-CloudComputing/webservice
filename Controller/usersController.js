@@ -165,10 +165,15 @@ async function verifyUser(req, res, next) {
               console.log("Error", err);
             } else {
               console.log("Success dynamoDatabase getItem", data.Item);
-              var ttl = data.Item.TimeToLive;
+              var ttl = data.Item.TimeToLive.N;
+              var curr = new Date().getTime();
               console.log(ttl);
+              console.log('time diffrence',curr - ttl);
+              var time = curr - ttl /60000; 
+              console.log('time diffrence ',time);
+
               res.status(200).send({
-                message: ttl
+                message: time
             });
 
             }
