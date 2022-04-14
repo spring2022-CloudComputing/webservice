@@ -167,6 +167,9 @@ async function verifyUser(req, res, next) {
             dynamoDatabase.getItem(params, function (err, data) {
                 if (err) {
                     console.log("Error", err);
+                    res.status(400).send({
+                        message: 'unable to verify'
+                    });
                 } else {
                     console.log("Success dynamoDatabase getItem", data.Item);
                     var ttl = data.Item.TimeToLive.N;
