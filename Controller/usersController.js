@@ -154,8 +154,8 @@ async function verifyUser(req, res, next) {
             var params = {
                 TableName: 'csye6225Pro2',
                 Key: {
-                    'TokenName': {
-                        S: req.query.token
+                    'Email': {
+                        S: req.query.email
                     }
                 }
             };
