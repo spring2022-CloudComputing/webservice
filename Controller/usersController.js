@@ -81,7 +81,7 @@ async function createUser(req, res, next) {
                 var parameter = {
                     TableName: 'csye6225Pro',
                     Item: {
-                        'Email':{
+                        'Email': {
                             S: udata.username
                         },
                         'TokenName': {
@@ -145,61 +145,68 @@ async function verifyUser(req, res, next) {
     const user = await getUserByUsername(req.query.email);
     if (user) {
 
-        var params = {
-            TableName: 'csye6225Pro',
-            Key: {
-                'TokenName': {
-                    S: req.query.token
-                }
-            }
-        };
+        if (user.dataValues.isVerified) {
+            res.status(202).send({
+                message: 'Already Successfully Verified!'
+            });
+        } else {
 
-        // Call DynamoDB to read the item from the table
-        dynamoDatabase.getItem(params, function (err, data) {
-            if (err) {
-                console.log("Error", err);
-            } else {
-                console.log("Success dynamoDatabase getItem", data.Item);
-                var ttl = data.Item.TimeToLive.N;
-                var curr = new Date().getTime();
-                console.log(ttl);
-                console.log('time diffrence', curr - ttl);
-                var time = (curr - ttl) / 60000;
-                console.log('time diffrence ', time);
-                if (time < 5) {
-                    User.update({
-                        isVerified: true,
-                    }, {
-                        where: {
-                            username: req.query.email
-                        }
-                    }).then((result) => {
-                        if (result == 1) {
-                            logger.info("update user 204");
-                            sdc.increment('endpoint.userUpdate');
-                            res.status(200).send({
-                                message: 'Successfully Verified!'
-                            });
-                        } else {
-                            res.status(400).send({
-                                message: 'unable to verify'
-                            });
-                        }
-                    }).catch(err => {
-                        res.status(500).send({
-                            message: 'Error Updating the user'
-                        });
-                    });
+            var params = {
+                TableName: 'csye6225Pro',
+                Key: {
+                    'TokenName': {
+                        S: req.query.token
+                    }
+                }
+            };
+
+            // Call DynamoDB to read the item from the table
+            dynamoDatabase.getItem(params, function (err, data) {
+                if (err) {
+                    console.log("Error", err);
                 } else {
-                    res.status(400).send({
-                        message: 'token Expired! you can never ever ever verify your mail now'
-                    });
+                    console.log("Success dynamoDatabase getItem", data.Item);
+                    var ttl = data.Item.TimeToLive.N;
+                    var curr = new Date().getTime();
+                    console.log(ttl);
+                    console.log('time diffrence', curr - ttl);
+                    var time = (curr - ttl) / 60000;
+                    console.log('time diffrence ', time);
+                    if (time < 5) {
+                        User.update({
+                            isVerified: true,
+                        }, {
+                            where: {
+                                username: req.query.email
+                            }
+                        }).then((result) => {
+                            if (result == 1) {
+                                logger.info("update user 204");
+                                sdc.increment('endpoint.userUpdate');
+                                res.status(200).send({
+                                    message: 'Successfully Verified!'
+                                });
+                            } else {
+                                res.status(400).send({
+                                    message: 'unable to verify'
+                                });
+                            }
+                        }).catch(err => {
+                            res.status(500).send({
+                                message: 'Error Updating the user'
+                            });
+                        });
+                    } else {
+                        res.status(400).send({
+                            message: 'token Expired! you can never ever ever verify your mail now'
+                        });
+                    }
+
+
+
                 }
-
-
-
-            }
-        });
+            });
+        }
     } else {
         res.status(400).send({
             message: 'User not found!'
