@@ -169,7 +169,7 @@ async function verifyUser(req, res, next) {
               var curr = new Date().getTime();
               console.log(ttl);
               console.log('time diffrence',curr - ttl);
-              var time = curr - ttl /60000; 
+              var time = (curr - ttl )/60000; 
               console.log('time diffrence ',time);
 
               res.status(200).send({
