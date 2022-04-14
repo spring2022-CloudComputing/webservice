@@ -140,7 +140,7 @@ async function createUser(req, res, next) {
 
 // Verify user
 async function verifyUser(req, res, next) {
-    console.log('verifyUser :', req);
+    console.log('verifyUser :');
     console.log('verifyUser :', req.query.email);
     const user = await getUserByUsername(req.query.email);
     if (user) {
@@ -173,29 +173,35 @@ async function verifyUser(req, res, next) {
                     var time = (curr - ttl) / 60000;
                     console.log('time diffrence ', time);
                     if (time < 5) {
-                        User.update({
-                            isVerified: true,
-                        }, {
-                            where: {
-                                username: req.query.email
-                            }
-                        }).then((result) => {
-                            if (result == 1) {
-                                logger.info("update user 204");
-                                sdc.increment('endpoint.userUpdate');
-                                res.status(200).send({
-                                    message: 'Successfully Verified!'
+                        if (data.Item.Email.S == user.dataValues.username) {
+                            User.update({
+                                isVerified: true,
+                            }, {
+                                where: {
+                                    username: req.query.email
+                                }
+                            }).then((result) => {
+                                if (result == 1) {
+                                    logger.info("update user 204");
+                                    sdc.increment('endpoint.userUpdate');
+                                    res.status(200).send({
+                                        message: 'Successfully Verified!'
+                                    });
+                                } else {
+                                    res.status(400).send({
+                                        message: 'unable to verify'
+                                    });
+                                }
+                            }).catch(err => {
+                                res.status(500).send({
+                                    message: 'Error Updating the user'
                                 });
-                            } else {
-                                res.status(400).send({
-                                    message: 'unable to verify'
-                                });
-                            }
-                        }).catch(err => {
-                            res.status(500).send({
-                                message: 'Error Updating the user'
                             });
-                        });
+                        } else {
+                            res.status(400).send({
+                                message: 'Token and email did not matched'
+                            });
+                        }
                     } else {
                         res.status(400).send({
                             message: 'token Expired! you can never ever ever verify your mail now'
