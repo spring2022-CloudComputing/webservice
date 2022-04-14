@@ -85,12 +85,9 @@ async function createUser(req, res, next) {
 
                 // Create the Service interface for dynamoDB
                 var parameter = {
-                    TableName: 'csye6225',
+                    TableName: 'csye6225Pro',
                     Item: {
-                        'email':  {
-                            S: udata.username
-                        },
-                        'Token': {
+                        'TokenName': {
                             S: randomnanoID
                         },
                         'TimeToLive': {
