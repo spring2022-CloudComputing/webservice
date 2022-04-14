@@ -152,12 +152,9 @@ async function verifyUser(req, res, next) {
         
         var params = {
             TableName: 'csye6225Pro',
-            Item: {
+            Key: {
                 'TokenName': {
-                    S: 'TokenName'
-                },
-                'TimeToLive': {
-                    N: '000'
+                    S: req.query.token
                 }
             }
         };
