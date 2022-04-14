@@ -16,6 +16,10 @@ AWS.config.update({
     region: process.env.AWS_REGION || 'us-east-1'
 });
 var sns = new AWS.SNS({});
+var dynamoDatabase = new AWS.DynamoDB({
+    apiVersion: '2012-08-10',
+    region: process.env.AWS_REGION || 'us-east-1'
+});
 
 // //Delete all User
 async function deleteAllUser(req, res, next) {
@@ -75,10 +79,7 @@ async function createUser(req, res, next) {
                     link: link
                 }
                 const randomnanoID = uuidv4();
-                var dynamoDatabase = new AWS.DynamoDB({
-                    apiVersion: '2012-08-10',
-                    region: 'us-east-1'
-                });
+               
                 const initialTime = Math.round(Date.now() / 1000);
                 const expiryTime = new Date().getTime();
                 //initialTime + 4 * 60;
@@ -132,32 +133,6 @@ async function createUser(req, res, next) {
                     isVerified: udata.isVerified
                 });
 
-                // publishTextPromise.then(
-                //     function (data) {
-                //         console.log('publishTextPromise.then', data);
-                //         console.log(`Message sent to the topic ${params.TargetArn}`);
-                //         console.log("MessageID is " + data);
-                //         logger.info("/create user 201");
-                //         logger.info(`Message sent to the topic ${params.TargetArn}`);
-                //         sdc.increment('endpoint.userCreate');
-                //         res.status(201).send({
-                //             id: udata.id,
-                //             first_name: udata.first_name,
-                //             last_name: udata.last_name,
-                //             username: udata.username,
-                //             account_created: udata.createdAt,
-                //             account_updated: udata.updatedAt,
-                //             isVerified: udata.isVerified
-                //         });
-
-                //     }).catch(
-
-                //     function (err) {
-                //         console.error(err, err.stack);
-                //         res.status(500).send(err);
-
-                //     });
-
             })
             .catch(err => {
                 logger.error(" Error while creating the user! 500");
@@ -166,114 +141,6 @@ async function createUser(req, res, next) {
                 });
             });
     }
-    // try {
-
-    //     if (!request.body || !request.body.username || !request.body.first_name || !request.body.last_name || !request.body.password) {
-
-    //         let response = {
-    //             statusCode: 400,
-    //             message: "Bad Request"
-    //         };
-    //         return response;
-    //     }
-
-    //     if (request.body.password) {
-    //         const encryptedPass = bcrypt.hashSync(request.body.password, 10);
-    //         request.body.password = encryptedPass;
-    //     }
-
-    //     const newUser1 = new User(request.body);
-    //     if (!emailValidator.validate(request.body.username)) {
-    //         const profileResponse = {
-    //             statusCode: 400,
-    //             message: "Bad Request"
-    //         };
-    //         return profileResponse;
-    //     }
-
-    //     let profileExists = await User.findOne({
-    //         where: {
-    //             username: request.body.username
-    //         }
-    //     })
-
-    //     if (profileExists) {
-
-    //         const profileResponse = {
-    //             statusCode: 400,
-    //             message: "Bad Request"
-    //         };
-    //         return profileResponse;
-    //     }
-
-    //     //in case of a new user
-    //     else {
-    //         const response = await newUser1.save();
-    //         //To send message to Dynamo DB
-    //         var dynamoDatabase = new AWS.DynamoDB({
-    //             apiVersion: '2012-08-10',
-    //             region: 'us-east-1'
-    //         });
-    //         const initialTime = Math.round(Date.now() / 1000);
-    //         const expiryTime = initialTime + 4 * 60;
-    //         const randomnanoID = uuidv4();
-
-    //         // Create the Service interface for dynamoDB
-    //         var parameter = {
-    //             TableName: 'myDynamoTokenTable',
-    //             Item: {
-    //                 'Token': {
-    //                     S: randomnanoID
-    //                 },
-    //                 'TimeToLive': {
-    //                     N: expiryTime.toString()
-    //                 }
-    //             }
-    //         };
-
-    //         //saving the token onto the dynamo DB
-    //         await dynamoDatabase.putItem(parameter).promise();
-
-    //         //To send message onto SNS
-    //         //var sns = new AWS.SNS({apiVersion: '2010-03-31'});
-
-    //         // Create publish parameters
-    //         var params = {
-    //             Message: response.username,
-    //             Subject: randomnanoID,
-    //             TopicArn: 'arn:aws:sns:us-east-1:861022598256:verify_email:9ea6311f-e589-4175-ae3e-961c4865ce4f'
-
-    //         };
-
-    //         //var topicARN= 'arn:aws:sns:us-east-1:172869529067:VerifyingEmail';
-
-    //         var publishTextPromise = new AWS.SNS({
-    //             apiVersion: '2010-03-31',
-    //             region: 'us-east-1'
-    //         });
-    //         await publishTextPromise.publish(params).promise();
-
-    //         //returning response of the creating user.
-    //         const returnProfile = {
-    //             statusCode: 200,
-    //             message: {
-    //                 id: response.id,
-    //                 first_name: response.first_name,
-    //                 last_name: response.last_name,
-    //                 username: response.username,
-    //                 account_created: response.createdAt,
-    //                 account_updated: response.updatedAt
-    //             }
-    //         };
-    //         return returnProfile;
-    //     }
-    // } catch (e) {
-    //     let response1 = {
-    //         statusCode: 500,
-    //         message: e.message
-    //     };
-    //     return response1;
-    // }
 }
 
 // Verify user
@@ -282,16 +149,34 @@ async function verifyUser(req, res, next) {
     console.log('verifyUser :', req.query.email);
     const user = await getUserByUsername(req.query.email);
     if (user) {
-        logger.info("get user 200");
-        res.status(200).send({
-            id: user.dataValues.id,
-            first_name: user.dataValues.first_name,
-            last_name: user.dataValues.last_name,
-            username: user.dataValues.username,
-            account_created: user.dataValues.createdAt,
-            account_updated: user.dataValues.updatedAt,
-            isVerified: user.dataValues.isVerified
-        });
+        
+        var params = {
+            TableName: 'csye6225Pro',
+            Item: {
+                'TokenName': {
+                    S: randomnanoID
+                },
+                'TimeToLive': {
+                    N: expiryTime.toString()
+                }
+            }
+        };
+        // var params = {
+        //     TableName: 'TABLE',
+        //     Key: {
+        //       'KEY_NAME': {N: '001'}
+        //     },
+        //     ProjectionExpression: 'ATTRIBUTE_NAME'
+        //   };
+          
+          // Call DynamoDB to read the item from the table
+          dynamoDatabase.getItem(params, function(err, data) {
+            if (err) {
+              console.log("Error", err);
+            } else {
+              console.log("Success", data.Item);
+            }
+          });
     } else {
         res.status(400).send({
             message: 'User not found!'
