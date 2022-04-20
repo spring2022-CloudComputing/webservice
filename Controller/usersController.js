@@ -188,7 +188,7 @@ async function verifyUser(req, res, next) {
                         console.log('time diffrence', curr - ttl);
                         var time = (curr - ttl) / 60000;
                         console.log('time diffrence ', time);
-                        if (time < 5) {
+                        if (time < 2) {
                             if (data.Item.Email.S == user.dataValues.username) {
                                 User.update({
                                     isVerified: true,
