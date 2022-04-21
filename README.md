@@ -27,3 +27,5 @@ Testing:
     - npm run test
  
 
+
+aws acm import-certificate --certificate fileb://Certificate.pem \ --certificate-chain fileb://CertificateChain.pem \ --private-key fileb://PrivateKey.pem
