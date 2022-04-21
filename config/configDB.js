@@ -1,6 +1,6 @@
 const env = process.env;
 const fs = require('fs');
-const rdsCa = fs.readFileSync('config/ca-bundle.pem');
+const rdsCa = fs.readFileSync('config/global-bundle.pem');
 
 const config = {
     db: {
@@ -11,7 +11,7 @@ const config = {
         dialect: "mysql",
         dialectOptions: {
             ssl: {
-                rejectUnauthorized: false,
+                rejectUnauthorized: true,
                 ca: [rdsCa]
             }
         },
