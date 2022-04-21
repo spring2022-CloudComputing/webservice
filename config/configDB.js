@@ -11,7 +11,7 @@ const config = {
         dialect: "mysql",
         dialectOptions: {
             ssl: {
-                rejectUnauthorized: true,
+                rejectUnauthorized: false,
                 ca: [rdsCa]
             }
         },
