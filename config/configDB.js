@@ -9,12 +9,12 @@ const config = {
         password: env.DB_PASSWORD || 'Qwerty@12345!',
         database: env.DB_NAME || 'usersDB',
         dialect: "mysql",
-        dialectOptions: {
-            ssl: {
-                rejectUnauthorized: true,
-                ca: [rdsCa]
-            }
-        },
+        // dialectOptions: {
+        //     ssl: {
+        //         rejectUnauthorized: true,
+        //         ca: [rdsCa]
+        //     }
+        // },
         port: 3306,
         pool: {
             max: 5,
